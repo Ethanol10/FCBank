@@ -52,7 +52,7 @@ void printMenu(void);
 *******************************************************************************/
 int main(void)
 {	
-
+	printMenu();
     return 0;     
 }
 
@@ -66,7 +66,17 @@ int main(void)
 *******************************************************************************/
 void printMenu(void)
 {
-	
+	printf("*	*	*	*	*	*	*	*	* 	*	*	*	*\n");
+	printf("				WELCOME TO FCBANK						\n");
+	printf("Options:\n");
+	printf("Select an option by pressing the corresponding number key on your keyboard\n");
+	printf("1. Add an account\n");  
+	printf("2. Edit an existing account\n"); 
+	printf("3. Remove an account\n"); 
+	printf("4. Add a joint account\n");
+	printf("5. Withdraw from an existing account\n");
+	printf("6. Deposit into an existing account\n");
+	printf("7. Transfer between two existing accounts\n");
 }
 
 /*******************************************************************************
