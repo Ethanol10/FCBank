@@ -1,0 +1,62 @@
+/* TESTING */
+	nodeAcc_t* headAcc;
+	nodeJAcc_t* headJointAcc;
+	
+	headAcc = malloc(sizeof(nodeAcc_t) * 1);
+	headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
+	
+	/*Initialise the first head.*/
+	(*headAcc).account.id = 0;
+	(*headJointAcc).account.userID1 = 0;
+	(*headJointAcc).account.userID2 = 0;
+	
+	/*Accounts for Single.*/
+	account_t account1;
+	account1.id = 11100;
+	account1.balance = 999;
+	account1.pin = 3541;
+	
+	account_t account2;
+	account2.id = 9999;
+	account2.balance = 1;
+	account2.pin = 3014;
+	
+	appendSingleAccNode(account1, headAcc);
+	appendSingleAccNode(account2, headAcc);
+	
+	printf("ID1 = %d\n", findSingleNode(11100,headAcc).id);
+	printf("ID2 = %d\n", findSingleNode(9999, headAcc).id);
+	
+	/*Accounts for Joint*/
+	jointAccount_t account3;
+	account3.userID1 = 11111;
+	account3.userID2 = 22222;
+	account3.balance = 20202;
+	account3.userPin2 = 2222;
+	account3.userPin1 = 1111;
+	
+	jointAccount_t account4;
+	account4.userID1 = 12121;
+	account4.userID2 = 23232;
+	account4.balance = 10;
+	account4.userPin2 = 9090;
+	account4.userPin1 = 9987;	
+	
+	appendJointAccNode(account3, headJointAcc);
+	appendJointAccNode(account4, headJointAcc);
+	
+	printf("Account3u1 = %d\n", findJointNode(11111,headJointAcc).userID1);
+	printf("Account3u2 = %d\n", findJointNode(22222,headJointAcc).userID2);
+	printf("Account4u1 = %d\n", findJointNode(12121,headJointAcc).userID1);
+	printf("Account4u2 = %d\n", findJointNode(23232,headJointAcc).userID2);
+	
+	removeSingleAccNode(findSingleNode(11100, headAcc), headAcc);
+	removeJointAccNode(findJointNode(11111, headJointAcc), headJointAcc);
+	
+	printf("ID1 = %d\n", findSingleNode(9999,headAcc).id);
+	printf("ID1 = %d\n", findSingleNode(11100,headAcc).id);
+	printf("Account4u1 = %d\n", findJointNode(11111,headJointAcc).userID1);
+	printf("Account4u1 = %d\n", findJointNode(23232,headJointAcc).userID1);
+	
+	/* End Program */
+	
