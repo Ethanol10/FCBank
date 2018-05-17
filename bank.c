@@ -4,7 +4,7 @@
  * Authors : 
    Mohamad Win - 98034628
    Ethan Goh - 12903151
-   Emmanuel Tshuma - 12311697
+   Emmanuel Tshuma - 13211697
    Varun Sriram - 12568731
    Ngoc Thao Han Ho - 12868636
  * Date of submission: 10/05/2018
@@ -108,6 +108,9 @@ jointAccount_t findJointNode(jointAccount_t accountJ, nodeJAcc_t* head);
 *******************************************************************************/
 int main(void)
 {	
+
+	printMenu();
+	
 	/*nodeAcc_t* headAcc;
 	nodeJAcc_t* headJAcc;
 	*/
@@ -130,6 +133,21 @@ int main(void)
 *******************************************************************************/
 void printMenu(void)
 {
+
+	printf("*	*	*	*	*	*	*	*	* 	*	*	*	*\n");
+	printf("				WELCOME TO FCBANK						\n");
+	printf("Options:\n");
+	printf("Select an option by pressing the corresponding number key on your keyboard\n");
+	printf("1. Add an account\n");  
+	printf("2. Edit an existing account\n"); 
+	printf("3. Remove an account\n"); 
+	printf("4. Add a joint account\n");
+	printf("5. Withdraw from an existing account\n");
+	printf("6. Deposit into an existing account\n");
+	printf("7. Transfer between two existing accounts\n");
+	
+	
+				
 	
 }
 
@@ -157,6 +175,9 @@ void addAccount()
 *******************************************************************************/
 void editAccount()
 {
+	
+
+
 
 }
 
