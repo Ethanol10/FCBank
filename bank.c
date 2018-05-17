@@ -19,6 +19,13 @@
 #include <string.h>
 #include <math.h>
 
+/* Header files defined by group 26*/
+
+/*******************************************************************************
+ * List preprocessing directives - you may define your own.
+*******************************************************************************/
+#define MAX_NAME_LEN 10
+
 /*******************************************************************************
  * List structs - you may define struct date and struct student only. As the 
  project is being developed, more header files may be added.
@@ -28,6 +35,8 @@ struct account
 	int id;
 	int pin;
 	double balance;	
+	char fname[MAX_NAME_LEN] ;
+	char lname[MAX_NAME_LEN] ;
 };
 typedef struct account account_t;
 
@@ -38,10 +47,26 @@ struct jointAccount
 	int userTwoID;
 	int userTwoPin;
 	double balance;
-	
+	char fname1[MAX_NAME_LEN] ;
+	char lname1[MAX_NAME_LEN] ;
+	char fname2[MAX_NAME_LEN] ;
+	char lname2[MAX_NAME_LEN] ;
 };
-typedef struct account account_t;
+typedef struct account jointAccount_t;
 
+struct nodeAcc
+{
+	account_t account;
+	struct nodeAcc* nextNode;
+};
+typedef struct nodeAcc nodeAcc_t;
+
+struct nodeJAcc
+{
+	jointAccount_t account;
+	struct nodeJAcc* nextNode;
+};
+typedef struct nodeJAcc nodeJAcc_t;
 /*******************************************************************************
  * Function prototypes. As the project is being developed, more function 
  declarations may be added.
@@ -59,8 +84,39 @@ void compress();
 void decompress();
 void printMenu(void);
 
+/* Add single account at the end of the linked list.*/
+void appendSingleAccNode(account_t accountS, nodeAcc_t* head);
+
+/* Add a joint account at the end of the linked list*/
+void appendJointAccNode(jointAccount_t, nodeJAcc_t* head);
+
+/* Remove a single account in the linked list */
+void removeSingleAccNode(account_t accountS, nodeAcc_t* head);
+
+ /* Remove a joint account in the linked list*/
+void removeJointAccNode(jointAccount_t accountJ, nodeJAcc_t* head);
+
+/* Finds a single account in the linked list */
+account_t findSingleNode(account_t accountS, nodeAcc_t* head); 
+
+/* Finds a joint account in the linked list.*/
+jointAccount_t findJointNode(jointAccount_t accountJ, nodeJAcc_t* head);
+
+
+/*******************************************************************************
+ * Main
+*******************************************************************************/
 int main(void)
-{
+{	
+	/*nodeAcc_t* headAcc;
+	nodeJAcc_t* headJAcc;
+	*/
+	
+	
+	/* Deallocate head */
+	/*free(head);*/
+	
+	/* End Program */
     return 0;     
 }
 
@@ -229,4 +285,141 @@ void compress()
 void decompress()
 {
 
+}
+
+/*******************************************************************************
+ * This function decompresses the user's data 
+ input.
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+ Author: Varun Sriram
+*******************************************************************************/
+void appendSingleAccNode(account_t accountS, nodeAcc_t* head)
+{
+	nodeAcc_t* newNode = malloc(sizeof(nodeAcc_t) * 1);
+	nodeAcc_t currNode = *head;
+	
+	while(currNode.nextNode != NULL){
+		currNode = *currNode.nextNode;
+	}
+	
+	currNode.nextNode = newNode;
+	(*newNode).account = accountS;
+	(*newNode).nextNode = NULL;
+}
+/*******************************************************************************
+ * This function decompresses the user's data 
+ input.
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+ Author: Varun Sriram
+*******************************************************************************/
+/* Add a joint account at the end of the linked list*/
+void appendJointAccNode(jointAccount_t accountJ, nodeJAcc_t* head)
+{
+	nodeJAcc_t* newNode = malloc(sizeof(nodeJAcc_t) * 1);
+	nodeJAcc_t currNode = *head;
+	
+	while(currNode.nextNode != NULL){
+		currNode = *currNode.nextNode;
+	}
+	
+	currNode.nextNode = newNode;
+	(*newNode).account = accountJ;
+	(*newNode).nextNode = NULL;
+}
+
+/*******************************************************************************
+ * This function decompresses the user's data 
+ input.
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+ Author: Varun Sriram
+*******************************************************************************/
+/* Remove a single account in the linked list base on ID.*/
+void removeSingleAccNode(account_t accountS, nodeAcc_t* head)
+{
+	/* Variable Declaration*/
+	nodeAcc_t currNode = *head;
+	nodeAcc_t* nodeShift;
+	int found = 0; 
+	int location = 0;
+	int i;
+	
+	/* Find the node to delete, set the nodeShift to the 
+		node next to the account being deleted.*/
+	while( (currNode.nextNode != NULL) || (found != 1) ){
+		if(currNode.account.id == accountS.id){
+			found = 1;
+			nodeShift = currNode.nextNode;
+		}
+		else{
+			currNode = *currNode.nextNode;
+			location++;
+		}
+	}
+	
+	/* If the account is found, delete it by freeing the
+		currNode.nextNode and shifting the neighbour node
+		up to make the current node have the address of the
+		shifted node.*/
+	if(found){
+		currNode = *head;
+		for( i = 0; i < location; i++ ){
+			currNode = *currNode.nextNode;
+		}
+		free(currNode.nextNode);
+		currNode.nextNode = nodeShift;
+	}
+}
+
+/*******************************************************************************
+ * This function decompresses the user's data 
+ input.
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+ Author: Varun Sriram
+*******************************************************************************/
+ /* Remove a joint account in the linked list*/
+void removeJointAccNode(jointAccount_t accountJ, nodeJAcc_t* head)
+{
+	
+}
+
+/*******************************************************************************
+ * This function decompresses the user's data 
+ input.
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+ Author: Varun Sriram
+*******************************************************************************/
+/* Finds a single account in the linked list */
+account_t findSingleNode(account_t accountS, nodeAcc_t* head)
+{
+	return accountS;
+}
+
+/*******************************************************************************
+ * This function decompresses the user's data 
+ input.
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+ Author: Varun Sriram
+*******************************************************************************/
+/* Finds a joint account in the linked list.*/
+jointAccount_t findJointNode(jointAccount_t accountJ, nodeJAcc_t* head)
+{
+	return accountJ;
 }
