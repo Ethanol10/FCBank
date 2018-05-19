@@ -2,11 +2,12 @@
  * 48430 Fundamentals of C Programming - Assignment 3
  * Group:26
  * Authors : 
-   Mohamad Win - 98034628
-   Ethan Goh - 12903151
-   Emmanuel Tshuma - 12311697
-   Varun Sriram - 12568731
-   Ngoc Thao Han Ho - 12868636
+ * Mohamad Win - 98034628
+ * Ethan Goh - 12903151
+ * Emmanuel Tshuma - 12311697
+ * Varun Sriram - 12568731
+ * Ngoc Thao Han Ho - 12868636
+   
  * Date of submission: 10/05/2018
 *******************************************************************************/
 
@@ -29,6 +30,8 @@
 /*******************************************************************************
  * List structs
 *******************************************************************************/
+	/* User defined structs that are shared between the linked list and 
+		this file are in the "linked_list_implementation.h" file. */
 
 /*******************************************************************************
  * Function prototypes. As the project is being developed, more function 
@@ -45,14 +48,20 @@ void encrypt();
 void decrypt();
 void compress();
 void decompress();
-void printMenu(void);
+void printMenu(int menuNo);
 
 /*******************************************************************************
  * Main
 *******************************************************************************/
 int main(void)
 {	
-	printMenu();
+	printMenu(1);
+	printMenu(2);
+	printMenu(3);
+	printMenu(4);
+	printMenu(100);
+	
+	
     return 0;     
 }
 
@@ -64,19 +73,52 @@ int main(void)
  * - a new account
  Author: Mohamad Win
 *******************************************************************************/
-void printMenu(void)
+void printMenu(int menuNo)
 {
-	printf("*	*	*	*	*	*	*	*	* 	*	*	*	*\n");
-	printf("				WELCOME TO FCBANK						\n");
-	printf("Options:\n");
-	printf("Select an option by pressing the corresponding number key on your keyboard\n");
-	printf("1. Add an account\n");  
-	printf("2. Edit an existing account\n"); 
-	printf("3. Remove an account\n"); 
-	printf("4. Add a joint account\n");
-	printf("5. Withdraw from an existing account\n");
-	printf("6. Deposit into an existing account\n");
-	printf("7. Transfer between two existing accounts\n");
+	switch (menuNo){
+		case 1:
+			printf("*\t*\t*\t*\t*\t*\t*");
+			printf("\t*\t*\t*\t*\t*\t*\n");
+			printf("\t\t\t\tWELCOME TO FCBANK\n");
+			printf("Please select an option below by pressing the ");
+			printf("corresponding number key on your keyboard\n");
+			printf("1. Log in to existing account\n");
+			printf("2. Create a new account\n");
+			printf("3. Exit program\n");
+			break;
+		case 2:
+			printf("Please enter your ID associated with your account\n");
+			break;
+		case 3: 
+			printf("Welcome! What would you like to do today?\n");
+			printf("1. Deposit cash\n");
+			printf("2. Withdraw cash\n");
+			printf("3. Edit account\n");
+			printf("4. Delete your account\n");
+			printf("5. Transfer funds to another account\n");
+			printf("6. Log out\n");
+			break;
+		case 4:
+			printf("Creating Account: Type '!exit' at any time to quit\n");
+			break;
+		case 5: 
+			break;
+		default:
+			printf("*	*	*	*	*	*	*	*	* 	*	*	*	*\n");
+			printf("				WELCOME TO FCBANK						\n");
+			printf("Options:\n");	
+			printf("Select an option by pressing ");
+			printf("the corresponding number key on your keyboard\n");
+			printf("1. Add an account\n");  
+			printf("2. Edit an existing account\n"); 
+			printf("3. Remove an account\n"); 
+			printf("4. Add a joint account\n");
+			printf("5. Withdraw from an existing account\n");
+			printf("6. Deposit into an existing account\n");
+			printf("7. Transfer between two existing accounts\n");
+			printf("8. Exit program\n");
+			break;
+	}
 }
 
 /*******************************************************************************
@@ -89,7 +131,7 @@ void printMenu(void)
 *******************************************************************************/
 void addAccount()
 {
-
+	
 }
 
 /*******************************************************************************
