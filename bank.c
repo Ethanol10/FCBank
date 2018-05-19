@@ -26,6 +26,8 @@
 /*******************************************************************************
  * List preprocessing directives - you may define your own.
 *******************************************************************************/
+#define TRUE 1;
+#define FALSE 0;
 
 /*******************************************************************************
  * List structs
@@ -49,18 +51,93 @@ void decrypt();
 void compress();
 void decompress();
 void printMenu(int menuNo);
+int isCorrectLogin(int userID, int userPin, nodeAcc_t* headS, 
+					nodeJAcc_t* headJ);
 
 /*******************************************************************************
  * Main
 *******************************************************************************/
 int main(void)
 {	
-	printMenu(1);
-	printMenu(2);
-	printMenu(3);
-	printMenu(4);
-	printMenu(100);
+	int userInput = 0;
+	int* currentUserID = malloc(sizeof(int) * 1);
+	int* currentUserPin = malloc(sizeof(int) * 1);
+	int found = FALSE;
+	nodeAcc_t* headAcc = malloc(sizeof(nodeAcc_t) * 1);
+	nodeJAcc_t* headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
 	
+	/*TEST INPUTS*/
+	/*Initialise the first head.*/
+	(*headAcc).account.id = 0;
+	(*headJointAcc).account.userID1 = 0;
+	(*headJointAcc).account.userID2 = 0;
+	
+	/*Accounts for Single.*/
+	account_t account1;
+	account1.id = 11100;
+	account1.balance = 999;
+	account1.pin = 3541;
+	
+	account_t account2;
+	account2.id = 9999;
+	account2.balance = 1;
+	account2.pin = 3014;
+	
+	appendSingleAccNode(account1, headAcc);
+	appendSingleAccNode(account2, headAcc);
+	
+	/*Accounts for Joint*/
+	jointAccount_t account3;
+	account3.userID1 = 11111;
+	account3.userID2 = 22222;
+	account3.balance = 20202;
+	account3.userPin2 = 2222;
+	account3.userPin1 = 1111;
+	
+	jointAccount_t account4;
+	account4.userID1 = 12121;
+	account4.userID2 = 23232;
+	account4.balance = 10;
+	account4.userPin2 = 9090;
+	account4.userPin1 = 9987;	
+	
+	appendJointAccNode(account3, headJointAcc);
+	appendJointAccNode(account4, headJointAcc);
+	/* TEST INPUTS */
+
+	while(userInput != 3){
+		/* Initial start up menu*/
+		printMenu(1);
+		scanf(" %d", &userInput);
+		switch (userInput){
+			case 1: /* User Log in*/
+				printMenu(2);
+				printf("Bank ID: \n");
+				if(scanf(" %d", currentUserID) == 1){
+					printf("PIN no: \n");
+					scanf(" %d", currentUserPin);
+					found = isCorrectLogin(*currentUserID,
+									*currentUserPin, headAcc, headJointAcc);
+					if(found){
+						printMenu(3);
+					}
+					else{
+						printf("Invalid Bank ID/PIN combination. ");
+						printf("Please try again.\n");
+					}
+				}
+				else{
+					printf("Invalid Bank ID. Please try again.\n");
+				}
+				break;
+			case 2: /* Creating a new account*/
+				break;
+			case 3: /*Exit the program*/
+				break;
+			default: /* Invalid Input*/
+				printf("Invalid input, please try again");
+		}
+	}
 	
     return 0;     
 }
@@ -82,7 +159,7 @@ void printMenu(int menuNo)
 			printf("\t\t\t\tWELCOME TO FCBANK\n");
 			printf("Please select an option below by pressing the ");
 			printf("corresponding number key on your keyboard\n");
-			printf("1. Log in to existing account\n");
+			printf("1. Log in to an existing account\n");
 			printf("2. Create a new account\n");
 			printf("3. Exit program\n");
 			break;
@@ -99,7 +176,7 @@ void printMenu(int menuNo)
 			printf("6. Log out\n");
 			break;
 		case 4:
-			printf("Creating Account: Type '!exit' at any time to quit\n");
+			printf("Creating Account:\n");
 			break;
 		case 5: 
 			break;
@@ -275,3 +352,41 @@ void decompress()
 
 }
 
+/*******************************************************************************
+ * This function checked if the user data inputted matches an account in the 
+ * linked list.
+ * inputs:
+ * - Bank ID (int userID)
+ * - Bank PIN (int userPin)
+ * - Head of linked list of single accounts (nodeAcc_t* headS)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+ * outputs:
+ * - Integer acting as boolean variable to determine true or false.
+ Author: Ethan Goh
+*******************************************************************************/
+int isCorrectLogin(int userID,
+					int userPin, 
+					nodeAcc_t* headS, 
+					nodeJAcc_t* headJ){
+	account_t testAcc;
+	jointAccount_t testJoint;
+	
+	testAcc = findSingleNode(userID, headS);
+	testJoint = findJointNode(userID, headJ);
+	
+	if(testAcc.id != 0){
+		if(testAcc.pin == userPin){
+			return TRUE;
+		}
+	}
+	else if(testJoint.userID1 != 0){
+		if(testJoint.userPin1 == userPin || testJoint.userPin2 == userPin){
+			return TRUE;
+		}
+	}
+	else{
+		return FALSE;
+	}
+	
+	return FALSE;
+}
