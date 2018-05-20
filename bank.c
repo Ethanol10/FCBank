@@ -26,8 +26,9 @@
 /*******************************************************************************
  * List preprocessing directives - you may define your own.
 *******************************************************************************/
-#define TRUE 1;
-#define FALSE 0;
+#define TRUE 1
+#define FALSE 0
+#define MAX_NAME_LEN 11
 
 /*******************************************************************************
  * List structs
@@ -39,12 +40,11 @@
  * Function prototypes. As the project is being developed, more function 
  declarations may be added.
 *******************************************************************************/
-void addAccount(); 
+void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ); 
 void editAccount(); 
-void removeAccount(); 
-void addJointAccount();
-void withdraw();
-void deposit();
+void removeAccount();
+void withdraw(int userID);
+void deposit(int userID);
 void transfer();
 void encrypt();
 void decrypt();
@@ -53,6 +53,9 @@ void decompress();
 void printMenu(int menuNo);
 int isCorrectLogin(int userID, int userPin, nodeAcc_t* headS, 
 					nodeJAcc_t* headJ);
+void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ);
+void singleAccountCreation(nodeAcc_t* headS);
+void jointAccountCreation(nodeJAcc_t* headJ);
 
 /*******************************************************************************
  * Main
@@ -60,9 +63,6 @@ int isCorrectLogin(int userID, int userPin, nodeAcc_t* headS,
 int main(void)
 {	
 	int userInput = 0;
-	int* currentUserID = malloc(sizeof(int) * 1);
-	int* currentUserPin = malloc(sizeof(int) * 1);
-	int found = FALSE;
 	nodeAcc_t* headAcc = malloc(sizeof(nodeAcc_t) * 1);
 	nodeJAcc_t* headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
 	
@@ -108,34 +108,22 @@ int main(void)
 	while(userInput != 3){
 		/* Initial start up menu*/
 		printMenu(1);
+		userInput = 0;
 		scanf(" %d", &userInput);
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		
 		switch (userInput){
 			case 1: /* User Log in*/
-				printMenu(2);
-				printf("Bank ID: \n");
-				if(scanf(" %d", currentUserID) == 1){
-					printf("PIN no: \n");
-					scanf(" %d", currentUserPin);
-					found = isCorrectLogin(*currentUserID,
-									*currentUserPin, headAcc, headJointAcc);
-					if(found){
-						printMenu(3);
-					}
-					else{
-						printf("Invalid Bank ID/PIN combination. ");
-						printf("Please try again.\n");
-					}
-				}
-				else{
-					printf("Invalid Bank ID. Please try again.\n");
-				}
+				loginUser(headAcc, headJointAcc);
 				break;
 			case 2: /* Creating a new account*/
+				addAccount(headAcc, headJointAcc);
 				break;
 			case 3: /*Exit the program*/
 				break;
 			default: /* Invalid Input*/
-				printf("Invalid input, please try again");
+				printf("Invalid input, please try again\n");
+				break;
 		}
 	}
 	
@@ -145,9 +133,9 @@ int main(void)
 /*******************************************************************************
  * This function prints the initial menu with a list of functions the user may
  choose to use
- * - none
+ * - Integer to determine a menu to be printed (int menuNo)
  * outputs:
- * - a new account
+ * - none
  Author: Mohamad Win
 *******************************************************************************/
 void printMenu(int menuNo)
@@ -177,6 +165,10 @@ void printMenu(int menuNo)
 			break;
 		case 4:
 			printf("Creating Account:\n");
+			printf("What account type are you making today?\n");
+			printf("1. Single Account\n");
+			printf("2. Joint Account\n");
+			printf("3. Exit\n");
 			break;
 		case 5: 
 			break;
@@ -199,16 +191,36 @@ void printMenu(int menuNo)
 }
 
 /*******************************************************************************
- * This function adds an account to the system based on user input.
+ * This function creates a new account and places it in the linked list.
  * inputs:
- * - user details
+ * - Head of linked list of single accounts (nodeAcc_t* headS)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
  * outputs:
- * - a new account
- Author: Varun Sriram
+ * - none
+ Author: Ethan Goh
 *******************************************************************************/
-void addAccount()
+void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
+	int userInput = 0;
 	
+	printMenu(4);
+	while(userInput != 3){
+		scanf(" %d", &userInput);
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		
+		switch(userInput){			
+			case 1: /*Single Account*/
+				singleAccountCreation(headS);
+				userInput = 3;
+				break;
+			case 2: /*Joint Account*/
+				jointAccountCreation(headJ);
+				userInput = 3;
+				break;
+			case 3:	/*Exit Menu*/
+				break;
+		}
+	}
 }
 
 /*******************************************************************************
@@ -256,12 +268,12 @@ void JointAccount()
  * This function allows the user to withdraw money from their account 
  input.
  * inputs:
- * - amount the user wishes to withdraw
+ * - Integer holding Bank ID (int userID)
  * outputs:
  * - none
  Author: Emmanuel Tshuma
 *******************************************************************************/
-void withdraw()
+void withdraw(int userID)
 {
 	
 
@@ -270,12 +282,12 @@ void withdraw()
 /*******************************************************************************
  * This function allows the user to deposit money into their account.
  * inputs:
- * - amount the user wishes to deposit
+ * - Integer holding Bank ID (int userID)
  * outputs:
  * - none
  Author: Ngoc Thao Han Ho
 *******************************************************************************/
-void deposit()
+void deposit(int userID)
 {
 	
 }
@@ -389,4 +401,382 @@ int isCorrectLogin(int userID,
 	}
 	
 	return FALSE;
+}
+
+/*******************************************************************************
+ * This function controls the user login menu and allows the user to input a 
+ * number to access different menu items.
+ * inputs:
+ * - Head of linked list of single accounts (nodeAcc_t* headS)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+ * outputs:
+ * - none
+ Author: Ethan Goh
+*******************************************************************************/
+void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
+	int* currentUserID = malloc(sizeof(int) * 1);
+	int* currentUserPin = malloc(sizeof(int) * 1);
+	int found = FALSE;
+	int userInput;
+	
+	printMenu(2);
+	printf("Bank ID: \n");
+	if(scanf(" %d", currentUserID) == 1){
+		printf("PIN no: \n");
+		scanf(" %d", currentUserPin);
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		found = isCorrectLogin(*currentUserID,
+							*currentUserPin, headS, headJ);
+		if(found){
+			userInput = 0;
+			while(userInput != 6){
+				printMenu(3);
+				scanf(" %d", &userInput);
+				switch(userInput){
+					case 1: /*Deposit*/
+						deposit(*currentUserID);
+						break;
+					case 2: /*Withdraw*/
+						withdraw(*currentUserID);
+						break;
+					case 3: /*Edit Account Details*/
+						editAccount();
+						break;
+					case 4: /*Delete Account*/
+						removeAccount();
+						break;
+					case 5: /*Transfer funds to another account*/
+						transfer();
+						break;
+					case 6: /*Logout*/
+						found = FALSE;
+						*currentUserID = 0;
+						*currentUserPin = 0;
+						printf("Log out successful!\n\n");
+						break;
+					default:			
+						break;
+				}
+			}
+		}
+		else{
+			printf("Invalid Bank ID/PIN combination. ");
+			printf("Please try again.\n");
+		}
+	}
+	else{
+		printf("Invalid Bank ID. Please try again.\n");
+	}
+}
+
+/*******************************************************************************
+ * This function explicitly steps through a process to create a single account.
+ * inputs:
+ * - Head of linked list of single accounts (nodeAcc_t* headS)
+ * outputs:
+ * - none
+ Author: Ethan Goh
+*******************************************************************************/
+
+void singleAccountCreation(nodeAcc_t* headS){
+	int i;
+	account_t newAcc;
+	int allowed = FALSE;
+	int numberFound, letterFound;
+	int rndNo;
+	int pinInt;
+	char* pin = calloc(5, sizeof(char));
+	char* fname = calloc(MAX_NAME_LEN, sizeof(char));
+	char* lname = calloc(MAX_NAME_LEN, sizeof(char));
+	printf("Creating Single Account: \n");
+	/*First Name*/
+	while(!allowed){
+		printf("What is your first name? "); 
+		printf("(10 characters maximum)\n");
+		scanf(" %10s", fname);
+		numberFound = FALSE;
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		for(i = 0; i < MAX_NAME_LEN; i++){
+			if(fname[i] >= '0' && fname[i] <= '9'){
+				numberFound = TRUE;
+				i = MAX_NAME_LEN;
+			}
+		}
+		if(numberFound){
+			printf("Names cannot contain numbers.\n");
+		}
+		else{
+			allowed = TRUE; /*First name is valid*/
+		}
+	}
+				
+	allowed = FALSE;
+
+	/*Last Name*/
+	while(!allowed){
+		printf("What is your last name? "); 
+		printf("(10 characters maximum)\n");
+		scanf(" %10s", lname);
+		numberFound = FALSE;
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		for(i = 0; i < MAX_NAME_LEN; i++){
+			if(lname[i] >= '0' && lname[i] <= '9'){
+				numberFound = TRUE;
+				i = MAX_NAME_LEN;
+			}
+		}
+		if(numberFound){
+			printf("Names cannot contain numbers.\n");
+		}
+		else{
+			allowed = TRUE; /*Last name is valid*/
+		}
+	}
+		
+	allowed = FALSE;
+		
+	/*Assign a random ID. Reroll if already taken.*/
+	while(!allowed){
+		rndNo = rand() % (1000000 - 100000)	+ 100000;
+		allowed = findSingleNode(rndNo, headS).id == 0 ? TRUE : FALSE;
+	}
+	printf("Your unique Bank ID is: %d\n", rndNo);
+	
+	allowed = FALSE;
+		
+	/*Let the user choose a pin*/				
+	while(!allowed){
+		printf("Please choose a 4 digit PIN.\n");
+		scanf(" %4s", pin);
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		letterFound = FALSE;
+		for(i = 0; i < 5; i++){
+			if(pin[i] <= '0' && pin[i] >= '9'){
+				letterFound = TRUE;
+				i = 5;
+			}
+		}
+		if(letterFound){
+			printf("PIN cannot have letters.\n");
+		}
+		else{
+			pinInt = atoi(pin);	
+			allowed = TRUE;
+		}
+	}
+			
+	printf("Thank you for joining FCBank. We hope you have a great day!\n");
+	printf("Please log in to use your account.\n");
+	newAcc.id = rndNo;
+	newAcc.pin = pinInt;
+	strcpy(newAcc.fname, fname);
+	strcpy(newAcc.lname, lname);
+	newAcc.balance = 0;
+	appendSingleAccNode(newAcc, headS);
+	
+	free(fname);
+	free(lname);
+	free(pin);
+}
+
+/*******************************************************************************
+ * This function explicitly steps through a process to create a joint account.
+ * inputs:
+ * - Head of linked list of joint accounts (nodeAcc_t* headJ)
+ * outputs:
+ * - none
+ Author: Ethan Goh
+*******************************************************************************/
+
+void jointAccountCreation(nodeJAcc_t* headJ){
+	int i;
+	jointAccount_t newAcc;
+	int allowed = FALSE;
+	int numberFound, letterFound;
+	int rndNo1;
+	int rndNo2;
+	int pinInt1;
+	int pinInt2;
+	char* pin1 = calloc(5, sizeof(char));
+	char* pin2 = calloc(5, sizeof(char));
+	char* fname1 = calloc(MAX_NAME_LEN, sizeof(char));
+	char* lname1 = calloc(MAX_NAME_LEN, sizeof(char));
+	char* fname2 = calloc(MAX_NAME_LEN, sizeof(char));
+	char* lname2 = calloc(MAX_NAME_LEN, sizeof(char));
+	
+	printf("Creating Joint Account:\n");
+	/*1st User First Name*/
+	while(!allowed){
+		printf("What is the first name for the first user? "); 
+		printf("(10 characters maximum)\n");
+		scanf(" %10s", fname1);
+		numberFound = FALSE;
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		for(i = 0; i < MAX_NAME_LEN; i++){
+			if(fname1[i] >= '0' && fname1[i] <= '9'){
+				numberFound = TRUE;
+				i = MAX_NAME_LEN;
+			}
+		}
+		if(numberFound){
+			printf("Names cannot contain numbers.\n");
+		}
+		else{
+			allowed = TRUE; /*First name is valid*/
+		}
+	}
+				
+	allowed = FALSE;
+
+	/*1st User Last Name*/
+	while(!allowed){
+		printf("What is the last name for the first user? "); 
+		printf("(10 characters maximum)\n");
+		scanf(" %10s", lname1);
+		numberFound = FALSE;
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		for(i = 0; i < MAX_NAME_LEN; i++){
+			if(lname1[i] >= '0' && lname1[i] <= '9'){
+				numberFound = TRUE;
+				i = MAX_NAME_LEN;
+			}
+		}
+		if(numberFound){
+			printf("Names cannot contain numbers.\n");
+		}
+		else{
+			allowed = TRUE; /*Last name is valid*/
+		}
+	}
+		
+	allowed = FALSE;
+	
+	/*2nd User First Name*/
+	while(!allowed){
+		printf("What is the first name for the second  user? "); 
+		printf("(10 characters maximum)\n");
+		scanf(" %10s", fname2);
+		numberFound = FALSE;
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		for(i = 0; i < MAX_NAME_LEN; i++){
+			if(fname2[i] >= '0' && fname2[i] <= '9'){
+				numberFound = TRUE;
+				i = MAX_NAME_LEN;
+			}
+		}
+		if(numberFound){
+			printf("Names cannot contain numbers.\n");
+		}
+		else{
+			allowed = TRUE; /*First name is valid*/
+		}
+	}
+				
+	allowed = FALSE;
+
+	/*2nd User Last Name*/
+	while(!allowed){
+		printf("What is the last name for the second user? "); 
+		printf("(10 characters maximum)\n");
+		scanf(" %10s", lname2);
+		numberFound = FALSE;
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		for(i = 0; i < MAX_NAME_LEN; i++){
+			if(lname2[i] >= '0' && lname2[i] <= '9'){
+				numberFound = TRUE;
+				i = MAX_NAME_LEN;
+			}
+		}
+		if(numberFound){
+			printf("Names cannot contain numbers.\n");
+		}
+		else{
+			allowed = TRUE; /*Last name is valid*/
+		}
+	}
+		
+	allowed = FALSE;
+		
+	/*Assign a random ID for 1st user. Reroll if already taken.*/
+	while(!allowed){
+		rndNo1 = rand() % (1000000 - 100000) + 100000;
+		allowed = findJointNode(rndNo1, headJ).userID1 == 0 ? TRUE : FALSE;
+		allowed = (rndNo1 == 0) ? FALSE : TRUE;
+	}
+	printf("For %s, Your unique Bank ID is: %d\n", fname1, rndNo1);
+	
+	allowed = FALSE;
+		
+	/*Let the 1st user choose a pin*/				
+	while(!allowed){
+		printf("%s, Please choose a 4 digit PIN.\n", fname1);
+		scanf(" %4s", pin1);
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		letterFound = FALSE;
+		for(i = 0; i < 5; i++){
+			if(pin1[i] <= '0' && pin1[i] >= '9'){
+				letterFound = TRUE;
+				i = 5;
+			}
+		}
+		if(letterFound){
+			printf("PIN cannot have letters.\n");
+		}
+		else{
+			pinInt1 = atoi(pin1);	
+			allowed = TRUE;
+		}
+	}
+	
+	allowed = FALSE;
+	/*Assign a random ID for the 2nd user. Reroll if already taken.*/
+	while(!allowed){
+		rndNo2 = rand() % (1000000 - 100000) + 100000;
+		allowed = findJointNode(rndNo2, headJ).userID1 == 0 ? TRUE : FALSE;
+		allowed = (rndNo2 == 0) ? FALSE : TRUE;
+	}
+	printf("For %s, Your unique Bank ID is: %d\n", fname2, rndNo2);
+	
+	allowed = FALSE;
+		
+	/*Let the 2nd user choose a pin*/				
+	while(!allowed){
+		printf("%s, Please choose a 4 digit PIN.\n", fname2);
+		scanf(" %4s", pin2);
+		while(getchar() != '\n'){} /*Clear input buffer*/
+		letterFound = FALSE;
+		for(i = 0; i < 5; i++){
+			if(pin2[i] <= '0' && pin2[i] >= '9'){
+				letterFound = TRUE;
+				i = 5;
+			}
+		}
+		if(letterFound){
+			printf("PIN cannot have letters.\n");
+		}
+		else{
+			pinInt2 = atoi(pin2);	
+			allowed = TRUE;
+		}
+	}
+			
+	printf("Thank you for joining FCBank. We hope you have a great day!\n");
+	printf("Please log in to use your account.\n");
+	newAcc.userID1 = rndNo1;
+	newAcc.userID2 = rndNo2;
+	newAcc.userPin1 = pinInt1;
+	newAcc.userPin2 = pinInt2;
+	strcpy(newAcc.fname1, fname1);
+	strcpy(newAcc.fname2, fname2);
+	strcpy(newAcc.lname1, lname1);
+	strcpy(newAcc.lname2, lname2);
+	newAcc.balance = 0;
+	appendJointAccNode(newAcc, headJ);
+	
+	free(fname1);
+	free(lname1);
+	free(fname2);
+	free(lname2);
+	free(pin1);
+	free(pin2);
 }

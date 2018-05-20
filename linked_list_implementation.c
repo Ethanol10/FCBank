@@ -22,8 +22,6 @@ void appendSingleAccNode(account_t accountS, nodeAcc_t* head)
 			place the element in there
 		2)Else, go to the next nodes until nextNode field is null.
 	*/
-	printf("Debug\n");
-
 	if((*head).nextNode == NULL && (*head).account.id == 0){
 		(*head).account = accountS;
 	}
