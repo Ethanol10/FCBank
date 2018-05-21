@@ -189,40 +189,37 @@ void removeJointAccNode(jointAccount_t accountJ, nodeJAcc_t* head)
  * - user ID (int userID)
  * - Pointer to head of Linked List (nodeAcc_t* head)
  * outputs:
- * - Account (account_t)
+ * - Pointer to Account (account_t)
  Author: Ethan Goh
 *******************************************************************************/
-account_t findSingleNode(int userID, nodeAcc_t* head)
+nodeAcc_t* findSingleNode(int userID, nodeAcc_t* head)
 {
 	/*start at the head
 	check the fields and see if they match.
 	if the ID matches, return the account
 	if no id matches, return an account with NULL;
 	*/
-	nodeAcc_t currNode = *head;
-	nodeAcc_t failedNode;
-		
-	/*Account of ID = 0 defines an invalid account number.*/
-	failedNode.account.id = 0;
+	nodeAcc_t* currNode = head;
+	nodeAcc_t* failedNode = NULL;
 	
-	if(currNode.account.id == userID){
-		return currNode.account;
+	if((*currNode).account.id == userID){
+		return currNode;
 	}
 	
-	while(currNode.nextNode != NULL){
-		if(currNode.account.id == userID){
-			return currNode.account;
+	while((*currNode).nextNode != NULL){
+		if((*currNode).account.id == userID){
+			return currNode;
 		}
 		else{
-			currNode = *currNode.nextNode;
+			currNode = (*currNode).nextNode;
 		}
 	} 
 	
-	if(currNode.account.id == userID){
-		return currNode.account;
+	if((*currNode).account.id == userID){
+		return currNode;
 	}
 	
-	return failedNode.account;
+	return failedNode;
 }
 
 /*******************************************************************************
@@ -233,10 +230,10 @@ account_t findSingleNode(int userID, nodeAcc_t* head)
  * - User ID (int userID)
  * - Pointer to head of Linked List (nodeJAcc_t* head)
  * outputs:
- * - Joint Account (jointAccount_t)
+ * - Pointer to Joint Account (jointAccount_t *)
  Author: Ethan Goh
 *******************************************************************************/
-jointAccount_t findJointNode(int userID, nodeJAcc_t* head)
+nodeJAcc_t* findJointNode(int userID, nodeJAcc_t* head)
 {
 	/*start at the head
 	check the fields and see if they match.
@@ -244,32 +241,28 @@ jointAccount_t findJointNode(int userID, nodeJAcc_t* head)
 	if no id matches, return an account with NULL;
 	*/
 	
-	nodeJAcc_t currNode = *head;
-	nodeJAcc_t failedNode;
-		
-	/*Account of ID = 0 defines an invalid account number.*/
-	failedNode.account.userID1 = 0;
-	failedNode.account.userID2 = 0;
+	nodeJAcc_t* currNode = head;
+	nodeJAcc_t* failedNode = NULL; /*Account contains nothing if no match*/
 	
-	if(currNode.account.userID1 == userID 
-		|| currNode.account.userID2 == userID){
-		return currNode.account;
+	if((*currNode).account.userID1 == userID 
+		|| (*currNode).account.userID2 == userID){
+		return currNode;
 	}
 	
-	while(currNode.nextNode != NULL){
-		if(currNode.account.userID1 == userID 
-			|| currNode.account.userID2 == userID){
-			return currNode.account;
+	while((*currNode).nextNode != NULL){
+		if((*currNode).account.userID1 == userID 
+			|| (*currNode).account.userID2 == userID){
+			return currNode;
 		}
 		else{
-			currNode = *currNode.nextNode;
+			currNode = (*currNode).nextNode;
 		}
 	} 
 	
-	if(currNode.account.userID1 == userID 
-		|| currNode.account.userID2 == userID){
-		return currNode.account;
+	if((*currNode).account.userID1 == userID 
+		|| (*currNode).account.userID2 == userID){
+		return currNode;
 	}
 
-	return failedNode.account;
+	return failedNode;
 }

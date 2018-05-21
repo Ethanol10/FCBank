@@ -51,7 +51,7 @@ void appendSingleAccNode(account_t accountS, nodeAcc_t* head);
 void appendJointAccNode(jointAccount_t, nodeJAcc_t* head);
 void removeSingleAccNode(account_t accountS, nodeAcc_t* head);
 void removeJointAccNode(jointAccount_t accountJ, nodeJAcc_t* head);
-account_t findSingleNode(int userID, nodeAcc_t* head); 
-jointAccount_t findJointNode(int userID, nodeJAcc_t* head);
+nodeAcc_t* findSingleNode(int userID, nodeAcc_t* head); 
+nodeJAcc_t* findJointNode(int userID, nodeJAcc_t* head);
 
 #endif

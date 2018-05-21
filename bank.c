@@ -43,8 +43,8 @@
 void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ); 
 void editAccount(); 
 void removeAccount();
-void withdraw(int userID);
-void deposit(int userID);
+void withdraw(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
+void deposit(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void transfer();
 void encrypt();
 void decrypt();
@@ -102,7 +102,7 @@ int main(void)
 	account4.userPin1 = 9987;	
 	
 	appendJointAccNode(account3, headJointAcc);
-	appendJointAccNode(account4, headJointAcc);
+	appendJointAccNode(account4, headJointAcc);	
 	/* TEST INPUTS */
 
 	while(userInput != 3){
@@ -252,42 +252,40 @@ void removeAccount()
 }
 
 /*******************************************************************************
- * This function allows the user to make a new Joint account.
- * inputs:
- * user details
- * outputs:
- * - a new account(joint)
- Author: Ethan Goh
-*******************************************************************************/
-void JointAccount()
-{
-
-}
-
-/*******************************************************************************
  * This function allows the user to withdraw money from their account 
  input.
  * inputs:
  * - Integer holding Bank ID (int userID)
+ * - Head of linked list of single accounts (nodeAcc_t* headS)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
  * outputs:
  * - none
  Author: Emmanuel Tshuma
 *******************************************************************************/
-void withdraw(int userID)
+void withdraw(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
+/*	account_t* account1 = findSingleNode(userID, headS);
+	jointAccount_t* account2 = findJointNode(userID, headJ);
 	
-
+	if((*account1).id){
+		
+	}
+	else if((*account2).userID1){
+		
+	}*/
 }
 
 /*******************************************************************************
  * This function allows the user to deposit money into their account.
  * inputs:
  * - Integer holding Bank ID (int userID)
+ * - Head of linked list of single accounts (nodeAcc_t* headS)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
  * outputs:
  * - none
  Author: Ngoc Thao Han Ho
 *******************************************************************************/
-void deposit(int userID)
+void deposit(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
 	
 }
@@ -380,19 +378,19 @@ int isCorrectLogin(int userID,
 					int userPin, 
 					nodeAcc_t* headS, 
 					nodeJAcc_t* headJ){
-	account_t testAcc;
-	jointAccount_t testJoint;
+	nodeAcc_t* testAcc;
+	nodeJAcc_t* testJoint;
 	
 	testAcc = findSingleNode(userID, headS);
 	testJoint = findJointNode(userID, headJ);
 	
-	if(testAcc.id != 0){
-		if(testAcc.pin == userPin){
+	if(testAcc != NULL){
+		if((*testAcc).account.pin == userPin){
 			return TRUE;
 		}
 	}
-	else if(testJoint.userID1 != 0){
-		if(testJoint.userPin1 == userPin || testJoint.userPin2 == userPin){
+	else if(testJoint != NULL){
+		if((*testJoint).account.userPin1 == userPin || (*testJoint).account.userPin2 == userPin){
 			return TRUE;
 		}
 	}
@@ -434,10 +432,10 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 				scanf(" %d", &userInput);
 				switch(userInput){
 					case 1: /*Deposit*/
-						deposit(*currentUserID);
+						deposit(*currentUserID, headS, headJ);
 						break;
 					case 2: /*Withdraw*/
-						withdraw(*currentUserID);
+						withdraw(*currentUserID, headS, headJ);
 						break;
 					case 3: /*Edit Account Details*/
 						editAccount();
@@ -538,7 +536,7 @@ void singleAccountCreation(nodeAcc_t* headS){
 	/*Assign a random ID. Reroll if already taken.*/
 	while(!allowed){
 		rndNo = rand() % (1000000 - 100000)	+ 100000;
-		allowed = findSingleNode(rndNo, headS).id == 0 ? TRUE : FALSE;
+		allowed = findSingleNode(rndNo, headS) == NULL ? TRUE : FALSE;
 	}
 	printf("Your unique Bank ID is: %d\n", rndNo);
 	
@@ -700,7 +698,7 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	/*Assign a random ID for 1st user. Reroll if already taken.*/
 	while(!allowed){
 		rndNo1 = rand() % (1000000 - 100000) + 100000;
-		allowed = findJointNode(rndNo1, headJ).userID1 == 0 ? TRUE : FALSE;
+		allowed = findJointNode(rndNo1, headJ) == NULL ? TRUE : FALSE;
 		allowed = (rndNo1 == 0) ? FALSE : TRUE;
 	}
 	printf("For %s, Your unique Bank ID is: %d\n", fname1, rndNo1);
@@ -732,7 +730,7 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	/*Assign a random ID for the 2nd user. Reroll if already taken.*/
 	while(!allowed){
 		rndNo2 = rand() % (1000000 - 100000) + 100000;
-		allowed = findJointNode(rndNo2, headJ).userID1 == 0 ? TRUE : FALSE;
+		allowed = findJointNode(rndNo2, headJ) == NULL? TRUE : FALSE;
 		allowed = (rndNo2 == 0) ? FALSE : TRUE;
 	}
 	printf("For %s, Your unique Bank ID is: %d\n", fname2, rndNo2);

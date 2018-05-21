@@ -45,18 +45,22 @@
 	appendJointAccNode(account3, headJointAcc);
 	appendJointAccNode(account4, headJointAcc);
 	
-	printf("Account3u1 = %d\n", findJointNode(11111,headJointAcc).userID1);
-	printf("Account3u2 = %d\n", findJointNode(22222,headJointAcc).userID2);
-	printf("Account4u1 = %d\n", findJointNode(12121,headJointAcc).userID1);
-	printf("Account4u2 = %d\n", findJointNode(23232,headJointAcc).userID2);
 	
-	removeSingleAccNode(findSingleNode(11100, headAcc), headAcc);
-	removeJointAccNode(findJointNode(11111, headJointAcc), headJointAcc);
+	printf("Account3u1 = %d\n", (*findJointNode(11111,headJointAcc)).account.userID1);
+	printf("Account3u2 = %d\n", (*findJointNode(22222,headJointAcc)).account.userID2);
+	printf("Account4u1 = %d\n", (*findJointNode(12121,headJointAcc)).account.userID1);
+	printf("Account4u2 = %d\n", (*findJointNode(23232,headJointAcc)).account.userID2);
 	
-	printf("ID1 = %d\n", findSingleNode(9999,headAcc).id);
-	printf("ID1 = %d\n", findSingleNode(11100,headAcc).id);
-	printf("Account4u1 = %d\n", findJointNode(11111,headJointAcc).userID1);
-	printf("Account4u1 = %d\n", findJointNode(23232,headJointAcc).userID1);
+	removeSingleAccNode((*findSingleNode(11100, headAcc)).account, headAcc);
+	removeJointAccNode((*findJointNode(11111, headJointAcc)).account, headJointAcc);
 	
+	printf("ID1 = %d\n", (*findSingleNode(9999,headAcc)).account.id);
+	if(findSingleNode(11100,headAcc) == NULL){
+		printf("SUCCESS!");
+	}
+	if(findJointNode(11111,headJointAcc) == NULL){
+		printf("SUCCESS!!");
+	}
+	printf("Account4u1 = %d\n", (*findJointNode(23232,headJointAcc)).account.userID1);
 	/* End Program */
 	
