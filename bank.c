@@ -42,9 +42,9 @@
 *******************************************************************************/
 void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ); 
 void editAccount(); 
-void removeAccount();
+void removeAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void withdraw(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
-void deposit(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
+void deposit(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void transfer();
 void encrypt();
 void decrypt();
@@ -186,7 +186,7 @@ void printMenu(int menuNo)
 			printf("6. Deposit into an existing account\n");
 			printf("7. Transfer between two existing accounts\n");
 			printf("8. Exit program\n");
-			break;
+			
 	}
 }
 
@@ -246,9 +246,69 @@ void editAccount()
  * none
  Author: Ngoc Thao Han Ho
 *******************************************************************************/
-void removeAccount()
+void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
+    char sure_or_not, balance_check;
+    nodeAcc_t* temp_account;
+    nodeJAcc_t* temp_joint;
 
+    printf("Are you sure to delete your account? (Y/N) ");
+    scanf(" %c", &sure_or_not);
+
+    printf("\n");
+ 
+    switch (sure_or_not)
+    {
+       case 'Y': /*Yes to delete*/
+                temp_account = findSingleNode (*currentUserID, headS);
+                temp_joint = findJointNode (*currentUserID, headJ);
+                
+		
+			    if(temp_account != NULL && temp_joint == NULL) 
+			    {  
+	    	         printf("You still have $%.2lf as balance in your account.\n", (*temp_account).account.balance);
+			    }
+				    else if (temp_joint != NULL && temp_account == NULL)
+                {
+                    printf("You still have $%.2lf as balance in your account.\n", (*temp_joint).account.balance); 
+                }
+                          
+			    printf("Your balance will be lost after you delete your account.\nDo you wish to continue? (Y/N) ");
+			    scanf (" %c", &balance_check);
+                printf("\n");
+			   
+			    if (balance_check=='Y')
+	            {
+		          if (temp_account != NULL && temp_joint == NULL)
+  	              {
+		              removeSingleAccNode((*temp_account).account, headS);
+    		      }
+		          else if (temp_joint != NULL && temp_account == NULL)
+    	          {
+				      removeJointAccNode((*temp_joint).account, headJ);
+			      }
+	            printf("Your account was successfully deleted.\n");
+	            break;
+			    }   
+			    else if (balance_check == 'N')
+			    {
+		            break;
+    	        } 
+			    else
+			    {
+			       printf("Invalid input, please try again.\n");
+                   removeAccount(currentUserID, headS, headJ);
+			    }
+				break;
+				
+	   case 'N': /*No to delete*/
+				break;
+				
+	   default:
+	            printf("Invalid input, please try again.\n");
+	            removeAccount(currentUserID, headS, headJ);
+	            
+    }
 }
 
 /*******************************************************************************
@@ -285,9 +345,72 @@ void withdraw(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ)
  * - none
  Author: Ngoc Thao Han Ho
 *******************************************************************************/
-void deposit(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ)
+void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
-	
+	char want_or_not;
+	double add_money;
+    nodeAcc_t* temp_account;
+    nodeJAcc_t* temp_joint;
+    
+    temp_joint = findJointNode (*currentUserID, headJ);
+    temp_account = findSingleNode (*currentUserID, headS);	
+    
+    /* check how much is in the balance*/
+	if(temp_account != NULL && (*temp_account).account.balance>0 ) 
+	{  
+		printf("Your current balance is $%.2lf.\n", (*temp_account).account.balance);
+    }
+	else if (temp_joint != NULL && (*temp_joint).account.balance>0)
+    {
+        printf("Your current balance is $%.2lf.\n", (*temp_joint).account.balance);
+    }
+    
+    /*second question to make sure user want to delete their account*/
+    printf("Are you want to continue to deposit? (Y/N) "); 
+    scanf(" %c", &want_or_not);           
+    
+    switch (want_or_not)
+    {
+       case 'Y': /*Yes to deposit*/
+                    
+                    printf("How much do you want to deposit? ");
+				    scanf (" %lf", &add_money);
+				    printf("\n");
+				    
+				    
+				    if (temp_account != NULL && add_money > 0) /* deposit in single account*/
+				    {
+				        (*temp_account).account.balance += add_money;
+				        printf("Your deposit is successful.\n");
+				        printf("Your new balance is $%.2lf.\n", (*temp_account).account.balance);
+				        printf("\n");
+				        deposit(currentUserID, headS, headJ);
+				       
+				    }
+				    
+				    else if (temp_joint !=NULL && add_money > 0) /* deposit in joint account*/
+				    {
+				        (*temp_joint).account.balance += add_money;
+				        printf("Your deposit is successful.\n");
+				        printf("Your new balance is $%.2lf.\n", (*temp_joint).account.balance);
+				        printf("\n");
+				        deposit(currentUserID, headS, headJ);
+				  
+				    }
+				    else
+				    {
+				        printf("Invalid input, please try again.\n");
+				        deposit(currentUserID, headS, headJ);
+				    } 
+				    break;
+				
+	   case 'N': /*No to deposit*/
+				break;
+				
+	   default:
+	            printf("Invalid input, please try again.\n");
+	            deposit(currentUserID, headS, headJ);	            
+    }
 }
 
 /*******************************************************************************
@@ -432,7 +555,7 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 				scanf(" %d", &userInput);
 				switch(userInput){
 					case 1: /*Deposit*/
-						deposit(*currentUserID, headS, headJ);
+						deposit(currentUserID, headS, headJ);
 						break;
 					case 2: /*Withdraw*/
 						withdraw(*currentUserID, headS, headJ);
@@ -441,7 +564,8 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 						editAccount();
 						break;
 					case 4: /*Delete Account*/
-						removeAccount();
+						removeAccount(currentUserID, headS, headJ);
+						userInput = 6;
 						break;
 					case 5: /*Transfer funds to another account*/
 						transfer();
