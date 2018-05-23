@@ -41,7 +41,7 @@
  declarations may be added.
 *******************************************************************************/
 void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ); 
-void editAccount(); 
+void editAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ); 
 void removeAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void withdraw(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void deposit(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
@@ -91,8 +91,8 @@ int main(void)
 	account3.userID1 = 11111;
 	account3.userID2 = 22222;
 	account3.balance = 20202;
-	account3.userPin2 = 2222;
-	account3.userPin1 = 1111;
+	account3.userPin1 = 2222;
+	account3.userPin2 = 1111;
 	
 	jointAccount_t account4;
 	account4.userID1 = 12121;
@@ -171,7 +171,20 @@ void printMenu(int menuNo)
 			printf("3. Exit\n");
 			break;
 		case 5: 
+			printf("1. First Name\n");
+			printf("2. Second Name\n");
+			printf("3. PIN\n");
+			printf("4. Exit\n");
 			break;
+		case 6: 
+			printf("1. First User's First Name\n");
+			printf("2. First User's Last Name\n");
+			printf("3. First User's PIN\n");
+			printf("4. Second User's First Name\n");
+			printf("5. Second User's Last Name\n");
+			printf("6. Second User's PIN\n");
+			printf("7. Exit\n");
+			break;	
 		default:
 			printf("*	*	*	*	*	*	*	*	* 	*	*	*	*\n");
 			printf("				WELCOME TO FCBANK						\n");
@@ -232,9 +245,115 @@ void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ)
  * - edited account
  Author: Mohamad Win
 *******************************************************************************/
-void editAccount()
+void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
-
+	int choice, newPin;
+	char newFName[MAX_NAME_LEN];
+	char newLName[MAX_NAME_LEN];
+	int loop = 0;
+	nodeAcc_t* temp_account;
+    nodeJAcc_t* temp_joint;
+	
+	temp_joint = findJointNode (*currentUserID, headJ);
+    temp_account = findSingleNode (*currentUserID, headS);
+	
+	if(temp_account != NULL && temp_joint == NULL)
+	{
+		printf("What do you wish to change?\n");
+		printMenu(5);
+		scanf(" %d", &choice);
+		while(loop==0)
+		{
+			switch(choice)
+			{
+				case 1: /*First Name*/
+				printf("Please enter your new first name\n");
+				scanf("%s", newFName);
+				strcpy((*temp_account).account.fname, newFName);
+				printf("Your first name has been changed.\n");
+				loop=1;
+					break;
+				case 2: /*Last Name*/
+				printf("Please enter your new last name\n");
+				scanf("%s", newLName);
+				strcpy((*temp_account).account.lname, newLName);
+				printf("Your last name has been changed.\n");
+				loop=1;
+					break;
+				case 3: /*Pin*/
+				printf("Please enter your new desired PIN\n");
+				scanf("%d", &newPin);
+				(*temp_account).account.pin = newPin;
+				printf("Your PIN number has been changed.\n");
+				loop =1;
+					break;
+				case 4: /*Exit*/
+				loop =1;	
+					break;
+			}
+		}
+	}
+	
+	else if (temp_joint != NULL && temp_account == NULL)
+	{	
+		loop =0;
+		printf("What do you wish to change?\n");
+		printMenu(6);
+		scanf(" %d", &choice);
+		while(loop==0)
+		{
+			switch(choice)
+			{
+				case 1: /*First User's First Name*/
+					printf("Please enter your new first name\n");
+					scanf("%s", newFName);
+					strcpy((*temp_joint).account.fname1, newFName);
+					printf("Your first name has been changed.\n");
+					loop =1;
+					break;
+				case 2: /*First User's Last Name*/
+					printf("Please enter your new last name\n");
+					scanf("%s", newLName);
+					strcpy((*temp_joint).account.lname1, newLName);
+					printf("Your last name has been changed.\n");
+					loop =1;
+					break;
+				case 3: /*First User's Pin*/
+					printf("Please enter your new desired PIN\n");
+					scanf("%d", &newPin);
+					(*temp_joint).account.userPin1 = newPin;
+					printf("Your PIN number has been changed.\n");
+					loop =1;
+					break;
+				case 4: /*Second User's First Name*/
+					printf("Please enter your new first name\n");
+					scanf("%s", newFName);
+					strcpy((*temp_joint).account.fname2, newFName);
+					printf("Your first name has been changed.\n");
+					loop =1;
+					break;
+				case 5: /*Second User's Last Name*/
+					printf("Please enter your new last name\n");
+					scanf("%s", newLName);
+					strcpy((*temp_joint).account.lname2, newLName);
+					printf("Your last name has been changed.\n");
+					loop=1;
+					break;
+				case 6: /*Second User's Pin*/
+					printf("Please enter your new desired PIN\n");
+					scanf("%d", &newPin);
+					(*temp_joint).account.userPin2 = newPin;
+					printf("Your PIN number has been changed.\n");
+					loop =1;
+					break;	
+				case 7: /*Exit*/
+					loop =1;
+					break;
+			}
+		}
+	}
+	
+	
 }
 
 /*******************************************************************************
@@ -369,7 +488,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 		}
 	}
 		
-	printf("Do you wish to continue withdrawing?\n");
+	printf("Do you wish to continue withdrawing? Y or N\n");
 	scanf(" %c", &confirmation);
 	loop = 0;	
 		
@@ -641,7 +760,7 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 						withdraw(currentUserID, headS, headJ);
 						break;
 					case 3: /*Edit Account Details*/
-						editAccount();
+						editAccount(currentUserID, headS, headJ);
 						break;
 					case 4: /*Delete Account*/
 						removeAccount(currentUserID, headS, headJ);
