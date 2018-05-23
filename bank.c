@@ -436,11 +436,11 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
     temp_account = findSingleNode (*currentUserID, headS);	
     
     /* check how much is in the balance*/
-	if(temp_account != NULL && (*temp_account).account.balance>0 ) 
+	if(temp_account != NULL && (*temp_account).account.balance>=0 ) 
 	{  
 		printf("Your current balance is $%.2lf.\n", (*temp_account).account.balance);
     }
-	else if (temp_joint != NULL && (*temp_joint).account.balance>0)
+	else if (temp_joint != NULL && (*temp_joint).account.balance>=0)
     {
         printf("Your current balance is $%.2lf.\n", (*temp_joint).account.balance);
     }
