@@ -43,7 +43,7 @@
 void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ); 
 void editAccount(); 
 void removeAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
-void withdraw(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
+void withdraw(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void deposit(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void transfer();
 void encrypt();
@@ -230,7 +230,7 @@ void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ)
  * - account details 
  * outputs:
  * - edited account
- Author: Emmanuel Tshuma
+ Author: Mohamad Win
 *******************************************************************************/
 void editAccount()
 {
@@ -320,19 +320,99 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
  * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
  * outputs:
  * - none
- Author: Emmanuel Tshuma
+ Author: Mohamad Win
 *******************************************************************************/
-void withdraw(int userID, nodeAcc_t* headS, nodeJAcc_t* headJ)
+void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
-/*	account_t* account1 = findSingleNode(userID, headS);
-	jointAccount_t* account2 = findJointNode(userID, headJ);
+	int loop = 0;
+	char confirmation;
+	double amount;
+	nodeAcc_t* temp_account;
+	nodeJAcc_t* temp_joint;
 	
-	if((*account1).id){
-		
+	temp_joint = findJointNode (*currentUserID, headJ);
+    temp_account = findSingleNode (*currentUserID, headS);	
+	
+	/* check how much is in the balance*/
+	while(loop == 0)
+	{
+		if(temp_account != NULL && (*temp_account).account.balance>0 ) 
+		{  
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_account).account.balance);
+			loop =1;
+		}
+		/*If balance is too low, user cannot withdraw*/
+		else if(temp_account == NULL && (*temp_account).account.balance<=0)
+		{
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_account).account.balance);
+			printf("Your balance is too low to withdraw.\n");
+			printf("Returning to main menu.\n");
+			loop = 1;
+		}
+	
+		else if (temp_joint != NULL && (*temp_joint).account.balance>0)
+		{
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_joint).account.balance);
+			loop =1;
+		}
+		/*If balance is too low, user cannot withdraw*/
+		else if(temp_joint != NULL && (*temp_joint).account.balance<=0)
+		{
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_joint).account.balance);
+			printf("Your balance is too low to withdraw.\n");
+			printf("Returning to main menu.\n");
+			loop = 1;
+		}
 	}
-	else if((*account2).userID1){
 		
-	}*/
+	printf("Do you wish to continue withdrawing?\n");
+	scanf(" %c", &confirmation);
+	loop = 0;	
+		
+	while(loop==0)
+	{
+		switch(confirmation)
+		{
+			case 'Y': /*Yes to withdraw*/
+                    
+                printf("How much do you wish to withdraw? ");
+				scanf (" %lf", &amount);
+				printf("\n");
+				/*Withdraw from a single account*/
+				if (temp_account != NULL && amount > 0)
+				{
+				    (*temp_account).account.balance = 
+					(*temp_account).account.balance - amount;
+				    printf("Your withdraw is successful.\n");
+					printf("Your new balance is $%.2lf.\n", 
+					(*temp_account).account.balance);
+			        printf("\n");
+			        loop = 1;				       
+				}
+				/*Withdraw from the joint account*/   
+				else if (temp_joint !=NULL && amount > 0)
+			    {
+					(*temp_joint).account.balance = (*temp_joint).account.balance - amount;
+					printf("Your withdraw is successful.\n");
+			        printf("Your new balance is $%.2lf.\n", (*temp_joint).account.balance);
+			        printf("\n");
+			        loop =1;			  
+				}
+				
+			    break;
+				
+			case 'N': /*No to deposit*/
+				break;
+				
+			default:
+				printf("Invalid input, please try again.\n");
+				break;
+		}
+	}
 }
 
 /*******************************************************************************
@@ -421,7 +501,7 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
  * - account ID, account ID
  * outputs:
  * - none
- Author: Mohamad Win
+ Author: 
 *******************************************************************************/
 void transfer()
 {
@@ -435,7 +515,7 @@ void transfer()
  * - none
  * outputs:
  * - none
- Author: Mohamad Win
+ Author: 
 *******************************************************************************/
 void encrypt()
 {
@@ -558,7 +638,7 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 						deposit(currentUserID, headS, headJ);
 						break;
 					case 2: /*Withdraw*/
-						withdraw(*currentUserID, headS, headJ);
+						withdraw(currentUserID, headS, headJ);
 						break;
 					case 3: /*Edit Account Details*/
 						editAccount();
