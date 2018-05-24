@@ -1237,6 +1237,7 @@ int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ) {
 	FILE* writePtr;
 	nodeAcc_t* currNode = headS;
 	nodeJAcc_t* currNodeJ = headJ;
+	int success = FALSE;
 
 	writePtr = fopen("database.bin", "wb");
 
@@ -1278,8 +1279,9 @@ int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ) {
 			fprintf(writePtr, "\n");
 			currNodeJ = (*currNodeJ).nextNode;
 		}
+		success = TRUE;
 	}
 
 	fclose(writePtr);
-	return 0;
+	return success;
 }
