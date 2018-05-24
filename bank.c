@@ -525,10 +525,12 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 			    break;
 				
 			case 'N': /*No to deposit*/
+				loop =1;
 				break;
 				
 			default:
 				printf("Invalid input, please try again.\n");
+				withdraw(currentUserID, headS, headJ);
 				break;
 		}
 	}
