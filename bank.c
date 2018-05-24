@@ -46,8 +46,7 @@ void removeAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void withdraw(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void deposit(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void transfer();
-void encrypt();
-void decrypt();
+void encryptDecrypt(char *initial, char *changed);
 void compress();
 void decompress();
 void printMenu(int menuNo);
@@ -57,7 +56,9 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ);
 void singleAccountCreation(nodeAcc_t* headS);
 void jointAccountCreation(nodeJAcc_t* headJ);
 int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ);
-
+int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ);
+account_t singleAccountStringSplit(char* accountStr);
+jointAccount_t jointAccountStringSplit(char* jAccountStr);
 
 /*******************************************************************************
  * Main
@@ -73,111 +74,13 @@ int main(void)
 	(*headAcc).account.id = 0;
 	(*headJointAcc).account.userID1 = 0;
 	(*headJointAcc).account.userID2 = 0;
-
-	/*Accounts for Single.*/
-	account_t account1;
-	account1.id = 11100;
-	account1.balance = 999;
-	account1.pin = 3541;
-	account1.fname[0] = 'e';
-	account1.fname[1] = 't';
-	account1.fname[2] = 'h';
-	account1.fname[3] = 'a';
-	account1.fname[4] = 'n';
-	account1.fname[5] = '\0';
-	account1.lname[0] = 'e';
-	account1.lname[1] = 't';
-	account1.lname[2] = 'h';
-	account1.lname[3] = 'a';
-	account1.lname[4] = 'n';
-	account1.lname[5] = '\0';
-
-	account_t account2;
-	account2.id = 9999;
-	account2.balance = 1;
-	account2.pin = 3014;
-	account2.fname[0] = 'e';
-	account2.fname[1] = 't';
-	account2.fname[2] = 'h';
-	account2.fname[3] = 'a';
-	account2.fname[4] = 'n';
-	account2.fname[5] = '\0';
-	account2.lname[0] = 'e';
-	account2.lname[1] = 't';
-	account2.lname[2] = 'h';
-	account2.lname[3] = 'a';
-	account2.lname[4] = 'n';
-	account2.lname[5] = '\0';
-
-	appendSingleAccNode(account1, headAcc);
-	appendSingleAccNode(account2, headAcc);
-
-	/*Accounts for Joint*/
-	jointAccount_t account3;
-	account3.userID1 = 11111;
-	account3.userID2 = 22222;
-	account3.balance = 20202;
-	account3.userPin1 = 2222;
-	account3.userPin2 = 1111;
-	account3.fname1[0] = 'e';
-	account3.fname1[1] = 't';
-	account3.fname1[2] = 'h';
-	account3.fname1[3] = 'a';
-	account3.fname1[4] = 'n';
-	account3.fname1[5] = '\0';
-	account3.lname1[0] = 'e';
-	account3.lname1[1] = 't';
-	account3.lname1[2] = 'h';
-	account3.lname1[3] = 'a';
-	account3.lname1[4] = 'n';
-	account3.lname1[5] = '\0';
-	account3.fname2[0] = 'e';
-	account3.fname2[1] = 't';
-	account3.fname2[2] = 'h';
-	account3.fname2[3] = 'a';
-	account3.fname2[4] = 'n';
-	account3.fname2[5] = '\0';
-	account3.lname2[0] = 'e';
-	account3.lname2[1] = 't';
-	account3.lname2[2] = 'h';
-	account3.lname2[3] = 'a';
-	account3.lname2[4] = 'n';
-	account3.lname2[5] = '\0';
-
-	jointAccount_t account4;
-	account4.userID1 = 12121;
-	account4.userID2 = 23232;
-	account4.balance = 10;
-	account4.userPin2 = 9090;
-	account4.userPin1 = 9987;
-	account4.fname1[0] = 'e';
-	account4.fname1[1] = 't';
-	account4.fname1[2] = 'h';
-	account4.fname1[3] = 'a';
-	account4.fname1[4] = 'n';
-	account4.fname1[5] = '\0';
-	account4.lname1[0] = 'e';
-	account4.lname1[1] = 't';
-	account4.lname1[2] = 'h';
-	account4.lname1[3] = 'a';
-	account4.lname1[4] = 'n';
-	account4.lname1[5] = '\0';
-	account4.fname2[0] = 'e';
-	account4.fname2[1] = 't';
-	account4.fname2[2] = 'h';
-	account4.fname2[3] = 'a';
-	account4.fname2[4] = 'n';
-	account4.fname2[5] = '\0';
-	account4.lname2[0] = 'e';
-	account4.lname2[1] = 't';
-	account4.lname2[2] = 'h';
-	account4.lname2[3] = 'a';
-	account4.lname2[4] = 'n';
-	account4.lname2[5] = '\0';
-
-	appendJointAccNode(account3, headJointAcc);
-	appendJointAccNode(account4, headJointAcc);
-	/* TEST INPUTS */
+	
+	if(loadAccountsFromFile(headAcc, headJointAcc)){
+		printf("Accounts loaded successfully.\n");
+	}
+	else{
+		printf("Accounts failed to load.\n");
+	}
 
 	while (userInput != 3) {
 		/* Initial start up menu*/
@@ -738,32 +641,23 @@ void transfer()
 }
 
 /*******************************************************************************
- * This function encrypts the user's data 
- input.
+ * This function encrypts/decrypts the file holding a databse.
  * inputs:
- * - none
+ * - Pointer to first char in input string (char *initial)
+ * - Pointer to first char in output string (char *changed)
  * outputs:
  * - none
- Author: 
+ Author: Ethan Goh/Mohamad Win
 *******************************************************************************/
-void encrypt()
-{
-
-}
-
-/*******************************************************************************
- * This function decrypts the user's data if they are able to provide correct 
- credentials
- input.
- * inputs:
- * - none
- * outputs:
- * - none
- Author: Ethan Goh
-*******************************************************************************/
-void decrypt()
-{
-
+void encryptDecrypt(char *initial, char *changed) {
+	/*char key[] = {'F', 'C', 'B'};
+	
+	
+	
+	int i;
+	for(i = 0; i < strlen(initial); i++) {
+		changed[i] = initial[i] ^ key[i % (sizeof(key)/sizeof(char))];
+	}*/
 }
 
 /*******************************************************************************
@@ -919,6 +813,8 @@ void singleAccountCreation(nodeAcc_t* headS){
 	char* pin = calloc(5, sizeof(char));
 	char* fname = calloc(MAX_NAME_LEN, sizeof(char));
 	char* lname = calloc(MAX_NAME_LEN, sizeof(char));
+	int rndSeed = 0;
+	
 	printf("Creating Single Account: \n");
 	/*First Name*/
 	while(!allowed){
@@ -965,9 +861,16 @@ void singleAccountCreation(nodeAcc_t* headS){
 	}
 		
 	allowed = FALSE;
-		
-	/*Assign a random ID. Reroll if already taken.*/
+	/*
+	  Assign a random ID. Reroll if already taken.
+	  Using fname converted to an int + rand mod strlen(lname)	
+	  as a seed.
+	*/
+	for(i = 0; i < strlen(fname); i++){
+		rndSeed += fname[i] + rand() % strlen(lname);
+	}
 	while(!allowed){
+		srand(rndSeed);
 		rndNo = rand() % (1000000 - 100000)	+ 100000;
 		allowed = findSingleNode(rndNo, headS) == NULL ? TRUE : FALSE;
 	}
@@ -1028,6 +931,7 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	int rndNo2;
 	int pinInt1;
 	int pinInt2;
+    int rndSeed;
 	char* pin1 = calloc(5, sizeof(char));
 	char* pin2 = calloc(5, sizeof(char));
 	char* fname1 = calloc(MAX_NAME_LEN, sizeof(char));
@@ -1084,7 +988,7 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	
 	/*2nd User First Name*/
 	while(!allowed){
-		printf("What is the first name for the second  user? "); 
+		printf("What is the first name for the second user? "); 
 		printf("(10 characters maximum)\n");
 		scanf(" %10s", fname2);
 		numberFound = FALSE;
@@ -1128,7 +1032,14 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 		
 	allowed = FALSE;
 		
-	/*Assign a random ID for 1st user. Reroll if already taken.*/
+	/*Assign a random ID for 1st user. Reroll if already taken.
+	  Using fname converted to an int + rand mod strlen(lname)	
+	  as a seed.
+	*/
+	rndSeed = 0;
+	for(i = 0; i < strlen(fname1); i++){
+		rndSeed += fname1[i] + rand() % strlen(lname1);
+	}
 	while(!allowed){
 		rndNo1 = rand() % (1000000 - 100000) + 100000;
 		allowed = findJointNode(rndNo1, headJ) == NULL ? TRUE : FALSE;
@@ -1160,7 +1071,15 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	}
 	
 	allowed = FALSE;
-	/*Assign a random ID for the 2nd user. Reroll if already taken.*/
+	
+	/*Assign a random ID for the 2nd user. Reroll if already taken.
+	  Using fname converted to an int + rand mod strlen(lname)	
+	  as a seed.
+	*/
+	rndSeed = 0;
+	for(i = 0; i < strlen(fname2); i++){
+		rndSeed += fname2[i] + rand() % strlen(lname2);
+	}
 	while(!allowed){
 		rndNo2 = rand() % (1000000 - 100000) + 100000;
 		allowed = findJointNode(rndNo2, headJ) == NULL? TRUE : FALSE;
@@ -1213,12 +1132,12 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 }
 
 /*******************************************************************************
-* This function explicitly steps through a process to create a joint account.
+* This function saves all accounts of both types into a file.
 * inputs:
 * - Head of linked list of single accounts (nodeAcc_t* headJ)
 * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
 * outputs:
-* - none
+* - Integer indicating success in saving (int)
 Author: Ethan Goh
 *******************************************************************************/
 int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ) {
@@ -1284,4 +1203,249 @@ int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ) {
 
 	fclose(writePtr);
 	return success;
+}
+
+/*******************************************************************************
+* This function loads accounts from a database.bin file.
+* inputs:
+* - Head of linked list of single accounts (nodeAcc_t* headJ)
+* - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+* outputs:
+* - Integer indicating success in loading. (int)
+Author: Ethan Goh
+*******************************************************************************/
+int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ){
+	/*
+	WRITING FORMAT:
+	FOR SINGLE ACCOUNTS:
+	1) ID, PIN, BALANCE, FNAME, LNAME
+	
+	FOR JOINT ACCOUNTS:
+	1) ID1, ID2, PIN1, PIN2, BALANCE, FNAME1, LNAME1, FNAME2, LNAME2
+	
+	SINGLE ACCOUNTS ARE PRINTED FIRST, THEN ALL JOINT ACCOUNTS AFTERWARDS. 
+	*/
+	int success = FALSE;
+	FILE* readPtr;
+	char* accountStr = malloc(sizeof(char) * 150);
+	account_t readAccount;
+	jointAccount_t readJoint;
+	int jointFlag = FALSE;
+	
+	printf("Reading accounts from file\n");
+	
+	if((readPtr = fopen("database.bin", "rb")) != NULL){
+		while( ( fgets(accountStr, 150, readPtr) != NULL )){
+			if(!jointFlag){
+				if(!strcmp("JOINTACCOUNT\n", accountStr)){
+					jointFlag = TRUE;
+				}
+				else{
+					readAccount = singleAccountStringSplit(accountStr);
+					appendSingleAccNode(readAccount, headS);
+				}
+			}
+			else{
+				readJoint = jointAccountStringSplit(accountStr);
+				appendJointAccNode(readJoint, headJ);
+			}
+		}
+		success = TRUE;
+	}
+	
+	fclose(readPtr);
+	free(accountStr);
+	return success;
+}
+
+/*******************************************************************************
+* This function splits the string that holds account data into account fields.
+* inputs:
+* - Pointer to an Array of chars (char* accountStr)
+* outputs:
+* - Account with filled in data (account_t)
+Author: Ethan Goh
+*******************************************************************************/
+account_t singleAccountStringSplit(char* accountStr){
+	/*
+	WRITING FORMAT:
+	FOR SINGLE ACCOUNTS:
+	1) ID, PIN, BALANCE, FNAME, LNAME
+	*/
+	int i = 0, j = 0;
+	char * buffer = malloc(sizeof(char) * 50);
+	account_t account;
+	
+	/*Account ID*/
+	while(*(accountStr + i) != ' '){
+		buffer[j] = accountStr[i];
+		i++;
+		j++;
+	}
+	buffer[j] = '\0';
+	sscanf(buffer, " %d", &account.id);
+	j = 0;
+	i++;
+	
+	/*Account Pin*/
+	while(*(accountStr + i) != ' '){
+		buffer[j] = accountStr[i];
+		i++;
+		j++;
+	}
+	buffer[j] = '\0';
+	sscanf(buffer, " %d", &account.pin);
+	j = 0;
+	i++;
+
+	/*Account Balance*/
+	while(*(accountStr + i) != ' '){
+		buffer[j] = accountStr[i];
+		i++;
+		j++;
+	}
+	buffer[j] = '\0';
+	sscanf(buffer, " %lf", &account.balance);
+	j = 0;
+	i++;
+	
+	/*Account First Name*/
+	while(*(accountStr + i) != ' '){
+		buffer[j] = accountStr[i];
+		i++;
+		j++;
+	}
+	buffer[j] = '\0';
+	sscanf(buffer, " %s", account.fname);
+	j = 0;
+	i++;
+	
+	/*Account Last Name*/
+	while(*(accountStr + i) != '\n'){
+		buffer[j] = accountStr[i];
+		i++;
+		j++;
+	}
+	buffer[j] = '\0';
+	sscanf(buffer, " %s", account.lname);
+	
+	free(buffer);
+	return account;
+}
+
+/*******************************************************************************
+* This function splits the string that holds account data into account fields.
+* inputs:
+* - Pointer to an Array of chars (char* jAccountStr)
+* outputs:
+* - Joint Account with filled in data (account_t)
+Author: Ethan Goh
+*******************************************************************************/
+jointAccount_t jointAccountStringSplit(char* jAccountStr){
+	/*
+	WRITING FORMAT:
+	FOR JOINT ACCOUNTS:
+	1) ID1, ID2, PIN1, PIN2, BALANCE, FNAME1, LNAME1, FNAME2, LNAME2
+	*/
+	char bufferJ[75];
+	jointAccount_t joint;
+	int i = 0, j = 0;
+	
+	/*Account ID user 1*/
+	while(*(jAccountStr + i) != ' '){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %d", &joint.userID1);
+	j = 0;
+	i++;
+
+	/*Account ID user 2*/
+	while(*(jAccountStr + i) != ' '){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %d", &joint.userID2);
+	j = 0;
+	i++;
+	
+	/*Account PIN user 1*/
+	while(*(jAccountStr + i) != ' '){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %d", &joint.userPin1);
+	j = 0;
+	i++;
+
+	/*Account PIN user 2*/
+	while(*(jAccountStr + i) != ' '){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %d", &joint.userPin2);
+	j = 0;
+	i++;
+
+	/*Account Balance*/
+	while(*(jAccountStr + i) != ' '){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %lf", &joint.balance);
+	j = 0;
+	i++;
+	
+	/*Account First Name User 1*/
+	while(*(jAccountStr + i) != ' '){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %s", joint.fname1);
+	j = 0;
+	i++;
+	
+	/*Account Last Name User 1*/
+	while(*(jAccountStr + i) != ' '){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %s", joint.lname1);
+	j = 0;
+	i++;
+	
+	/*Account First Name User 2*/
+	while(*(jAccountStr + i) != ' '){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %s", joint.fname2);
+	j = 0;
+	i++;
+	
+	/*Account Last Name User 2*/
+	while(*(jAccountStr + i) != '\n'){
+		bufferJ[j] = jAccountStr[i];
+		i++;
+		j++;
+	}
+	bufferJ[j] = '\0';
+	sscanf(bufferJ, " %s", joint.lname2);
+	return joint;
 }
