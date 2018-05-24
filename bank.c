@@ -56,6 +56,8 @@ int isCorrectLogin(int userID, int userPin, nodeAcc_t* headS,
 void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ);
 void singleAccountCreation(nodeAcc_t* headS);
 void jointAccountCreation(nodeJAcc_t* headJ);
+int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ);
+
 
 /*******************************************************************************
  * Main
@@ -65,27 +67,51 @@ int main(void)
 	int userInput = 0;
 	nodeAcc_t* headAcc = malloc(sizeof(nodeAcc_t) * 1);
 	nodeJAcc_t* headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
-	
+
 	/*TEST INPUTS*/
 	/*Initialise the first head.*/
 	(*headAcc).account.id = 0;
 	(*headJointAcc).account.userID1 = 0;
 	(*headJointAcc).account.userID2 = 0;
-	
+
 	/*Accounts for Single.*/
 	account_t account1;
 	account1.id = 11100;
 	account1.balance = 999;
 	account1.pin = 3541;
-	
+	account1.fname[0] = 'e';
+	account1.fname[1] = 't';
+	account1.fname[2] = 'h';
+	account1.fname[3] = 'a';
+	account1.fname[4] = 'n';
+	account1.fname[5] = '\0';
+	account1.lname[0] = 'e';
+	account1.lname[1] = 't';
+	account1.lname[2] = 'h';
+	account1.lname[3] = 'a';
+	account1.lname[4] = 'n';
+	account1.lname[5] = '\0';
+
 	account_t account2;
 	account2.id = 9999;
 	account2.balance = 1;
 	account2.pin = 3014;
-	
+	account2.fname[0] = 'e';
+	account2.fname[1] = 't';
+	account2.fname[2] = 'h';
+	account2.fname[3] = 'a';
+	account2.fname[4] = 'n';
+	account2.fname[5] = '\0';
+	account2.lname[0] = 'e';
+	account2.lname[1] = 't';
+	account2.lname[2] = 'h';
+	account2.lname[3] = 'a';
+	account2.lname[4] = 'n';
+	account2.lname[5] = '\0';
+
 	appendSingleAccNode(account1, headAcc);
 	appendSingleAccNode(account2, headAcc);
-	
+
 	/*Accounts for Joint*/
 	jointAccount_t account3;
 	account3.userID1 = 11111;
@@ -93,41 +119,96 @@ int main(void)
 	account3.balance = 20202;
 	account3.userPin1 = 2222;
 	account3.userPin2 = 1111;
-	
+	account3.fname1[0] = 'e';
+	account3.fname1[1] = 't';
+	account3.fname1[2] = 'h';
+	account3.fname1[3] = 'a';
+	account3.fname1[4] = 'n';
+	account3.fname1[5] = '\0';
+	account3.lname1[0] = 'e';
+	account3.lname1[1] = 't';
+	account3.lname1[2] = 'h';
+	account3.lname1[3] = 'a';
+	account3.lname1[4] = 'n';
+	account3.lname1[5] = '\0';
+	account3.fname2[0] = 'e';
+	account3.fname2[1] = 't';
+	account3.fname2[2] = 'h';
+	account3.fname2[3] = 'a';
+	account3.fname2[4] = 'n';
+	account3.fname2[5] = '\0';
+	account3.lname2[0] = 'e';
+	account3.lname2[1] = 't';
+	account3.lname2[2] = 'h';
+	account3.lname2[3] = 'a';
+	account3.lname2[4] = 'n';
+	account3.lname2[5] = '\0';
+
 	jointAccount_t account4;
 	account4.userID1 = 12121;
 	account4.userID2 = 23232;
 	account4.balance = 10;
 	account4.userPin2 = 9090;
-	account4.userPin1 = 9987;	
-	
+	account4.userPin1 = 9987;
+	account4.fname1[0] = 'e';
+	account4.fname1[1] = 't';
+	account4.fname1[2] = 'h';
+	account4.fname1[3] = 'a';
+	account4.fname1[4] = 'n';
+	account4.fname1[5] = '\0';
+	account4.lname1[0] = 'e';
+	account4.lname1[1] = 't';
+	account4.lname1[2] = 'h';
+	account4.lname1[3] = 'a';
+	account4.lname1[4] = 'n';
+	account4.lname1[5] = '\0';
+	account4.fname2[0] = 'e';
+	account4.fname2[1] = 't';
+	account4.fname2[2] = 'h';
+	account4.fname2[3] = 'a';
+	account4.fname2[4] = 'n';
+	account4.fname2[5] = '\0';
+	account4.lname2[0] = 'e';
+	account4.lname2[1] = 't';
+	account4.lname2[2] = 'h';
+	account4.lname2[3] = 'a';
+	account4.lname2[4] = 'n';
+	account4.lname2[5] = '\0';
+
 	appendJointAccNode(account3, headJointAcc);
-	appendJointAccNode(account4, headJointAcc);	
+	appendJointAccNode(account4, headJointAcc);
 	/* TEST INPUTS */
 
-	while(userInput != 3){
+	while (userInput != 3) {
 		/* Initial start up menu*/
 		printMenu(1);
 		userInput = 0;
 		scanf(" %d", &userInput);
-		while(getchar() != '\n'){} /*Clear input buffer*/
-		
-		switch (userInput){
-			case 1: /* User Log in*/
-				loginUser(headAcc, headJointAcc);
-				break;
-			case 2: /* Creating a new account*/
-				addAccount(headAcc, headJointAcc);
-				break;
-			case 3: /*Exit the program*/
-				break;
-			default: /* Invalid Input*/
-				printf("Invalid input, please try again\n");
-				break;
+		while (getchar() != '\n') {} /*Clear input buffer*/
+
+		switch (userInput) {
+		case 1: /* User Log in*/
+			loginUser(headAcc, headJointAcc);
+			break;
+		case 2: /* Creating a new account*/
+			addAccount(headAcc, headJointAcc);
+			break;
+		case 3: /*Exit the program*/
+			break;
+		default: /* Invalid Input*/
+			printf("Invalid input, please try again\n");
+			break;
 		}
 	}
-	
-    return 0;     
+
+	/*TEST FILE CREATION*/
+	if (saveAccountsToFile(headAcc, headJointAcc)) {
+		printf("Success!\n");
+	}
+	else {
+		printf("Accounts not saved\n");
+	}
+	return 0;
 }
 
 /*******************************************************************************
@@ -1129,4 +1210,76 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	free(lname2);
 	free(pin1);
 	free(pin2);
+}
+
+/*******************************************************************************
+* This function explicitly steps through a process to create a joint account.
+* inputs:
+* - Head of linked list of single accounts (nodeAcc_t* headJ)
+* - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+* outputs:
+* - none
+Author: Ethan Goh
+*******************************************************************************/
+int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ) {
+	/*
+	WRITING FORMAT:
+	FOR SINGLE ACCOUNTS:
+	1) ID, PIN, BALANCE, FNAME, LNAME
+	
+	FOR JOINT ACCOUNTS:
+	1) ID1, ID2, PIN1, PIN2, BALANCE, FNAME1, LNAME1, FNAME2, LNAME2
+	
+	SINGLE ACCOUNTS ARE PRINTED FIRST, THEN ALL JOINT ACCOUNTS AFTERWARDS. 
+	*/
+	printf("Saving accounts to file\n");
+
+	FILE* writePtr;
+	nodeAcc_t* currNode = headS;
+	nodeJAcc_t* currNodeJ = headJ;
+
+	writePtr = fopen("database.bin", "wb");
+
+	if (writePtr != NULL) {
+		while (currNode != NULL) {
+			fprintf(writePtr, "%d", (*currNode).account.id);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%d", (*currNode).account.pin);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%lf", (*currNode).account.balance);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%s", (*currNode).account.fname);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%s", (*currNode).account.lname);
+			fprintf(writePtr, "\n");
+			currNode = (*currNode).nextNode;
+		}
+
+		fprintf(writePtr, "JOINTACCOUNT\n");
+
+		while (currNodeJ != NULL) {
+			fprintf(writePtr, "%d", (*currNodeJ).account.userID1);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%d", (*currNodeJ).account.userID2);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%d", (*currNodeJ).account.userPin1);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%d", (*currNodeJ).account.userPin2);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%lf", (*currNodeJ).account.balance);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%s", (*currNodeJ).account.fname1);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%s", (*currNodeJ).account.lname1);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%s", (*currNodeJ).account.fname2);
+			fprintf(writePtr, " ");
+			fprintf(writePtr, "%s", (*currNodeJ).account.lname2);
+			fprintf(writePtr, "\n");
+			currNodeJ = (*currNodeJ).nextNode;
+		}
+	}
+
+	fclose(writePtr);
+	return 0;
 }
