@@ -29,6 +29,8 @@
 #define TRUE 1
 #define FALSE 0
 #define MAX_NAME_LEN 11
+#define MAX_PASS_CHAR 20
+#define DEBUG
 
 /*******************************************************************************
  * List structs
@@ -46,7 +48,7 @@ void removeAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void withdraw(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void deposit(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void transfer();
-void encryptDecrypt(char *initial, char *changed);
+void encryptDecrypt(char *initial, char *changed, char* pass);
 void compress();
 void decompress();
 void printMenu(int menuNo);
@@ -63,55 +65,116 @@ jointAccount_t jointAccountStringSplit(char* jAccountStr);
 /*******************************************************************************
  * Main
 *******************************************************************************/
-int main(void)
+int main(int argc, char* argv[])
 {	
+	FILE* passPtr;
+	char pass[MAX_PASS_CHAR];
+	char passInp[MAX_PASS_CHAR];
 	int userInput = 0;
 	nodeAcc_t* headAcc = malloc(sizeof(nodeAcc_t) * 1);
 	nodeJAcc_t* headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
 
-	/*TEST INPUTS*/
-	/*Initialise the first head.*/
-	(*headAcc).account.id = 0;
-	(*headJointAcc).account.userID1 = 0;
-	(*headJointAcc).account.userID2 = 0;
-	
-	if(loadAccountsFromFile(headAcc, headJointAcc)){
-		printf("Accounts loaded successfully.\n");
-	}
-	else{
-		printf("Accounts failed to load.\n");
-	}
-
-	while (userInput != 3) {
-		/* Initial start up menu*/
-		printMenu(1);
-		userInput = 0;
-		scanf(" %d", &userInput);
-		while (getchar() != '\n') {} /*Clear input buffer*/
-
-		switch (userInput) {
-		case 1: /* User Log in*/
-			loginUser(headAcc, headJointAcc);
-			break;
-		case 2: /* Creating a new account*/
-			addAccount(headAcc, headJointAcc);
-			break;
-		case 3: /*Exit the program*/
-			break;
-		default: /* Invalid Input*/
-			printf("Invalid input, please try again\n");
-			break;
+	/*PASSWORD LOADING*/
+	if( (passPtr = fopen("mps.txt", "r")) != NULL){
+		if(fgets(pass, MAX_PASS_CHAR, passPtr) != NULL){
+			#ifdef DEBUG
+				printf("Master password acquisition success: ");
+				printf("%s\n", pass);
+			#endif
 		}
 	}
+	fclose(passPtr);
+	
+	if(argc <= 1){
+		printf("Specify a mode\n");
+		return 1;
+	} 
+	else if(strcmp(argv[1], "-norm!") == 0){
+		/*TEST INPUTS*/
+		/*Initialise the first head.*/
+/*		(*headAcc).account.id = 0;
+		(*headJointAcc).account.userID1 = 0;
+		(*headJointAcc).account.userID2 = 0;
+	*/	
+		printf("Please enter the master password -> \n");
+		scanf(" %20s", passInp);
+		if(strcmp(passInp, pass) == 0){
+			if(loadAccountsFromFile(headAcc, headJointAcc)){
+				#ifdef DEBUG
+				printf("Accounts loaded successfully.\n");
+				#endif
+			}
+			else{
+				#ifdef DEBUG
+				printf("Accounts failed to load, ");
+				printf("or there were no Accounts to load.");
+				#endif
+			}
 
-	/*TEST FILE CREATION*/
-	if (saveAccountsToFile(headAcc, headJointAcc)) {
-		printf("Success!\n");
+			while (userInput != 3) {
+				/* Initial start up menu*/
+				printMenu(1);
+				userInput = 0;
+				scanf(" %d", &userInput);
+				while (getchar() != '\n') {} /*Clear input buffer*/
+
+				switch (userInput) {
+				case 1: /* User Log in*/
+					loginUser(headAcc, headJointAcc);
+					break;
+				case 2: /* Creating a new account*/
+					addAccount(headAcc, headJointAcc);
+					break;
+				case 3: /*Exit the program*/
+					break;
+				default: /* Invalid Input*/
+					printf("Invalid input, please try again\n");
+					break;
+				}
+			}
+
+			/*TEST FILE CREATION*/
+			if (saveAccountsToFile(headAcc, headJointAcc)) {
+				#ifdef DEBUG
+				printf("Success!\n");
+				#endif
+			}
+			else {
+				#ifdef DEBUG
+				printf("Accounts not saved\n");
+				#endif
+			}
+		}
+		else{
+			printf("Password Incorrect.\n");
+		}
+		return 0;
 	}
-	else {
-		printf("Accounts not saved\n");
+	else if(strcmp(argv[1], "-pass?") == 0){
+		printf("Please enter the master password ->\n");
+		scanf("%s", passInp);
+		if(strcmp(pass, passInp) == 0){
+			int userInput;
+			while(userInput != 3){
+				printMenu(7);
+				scanf(" %d", &userInput);
+				
+				switch(userInput){
+					case 1:/*Change master password*/
+						break;
+					case 2:/*Modify Database*/
+						break;
+					case 3:/*Exit superuser*/
+						break;
+				}
+			}
+		}
+		else{
+			printf("Password incorrect.\n");
+		}
+		return 0;
 	}
-	return 0;
+	return 1;
 }
 
 /*******************************************************************************
@@ -169,21 +232,17 @@ void printMenu(int menuNo)
 			printf("6. Second User's PIN\n");
 			printf("7. Exit\n");
 			break;	
+		case 7:
+			printf("Superuser Control\n");
+			printf("1. Change master password\n");
+			printf("2. Wipe database record\n");
+			printf("3. Exit superuser\n");
+			break;
 		default:
-			printf("*	*	*	*	*	*	*	*	* 	*	*	*	*\n");
-			printf("				WELCOME TO FCBANK						\n");
-			printf("Options:\n");	
-			printf("Select an option by pressing ");
-			printf("the corresponding number key on your keyboard\n");
-			printf("1. Add an account\n");  
-			printf("2. Edit an existing account\n"); 
-			printf("3. Remove an account\n"); 
-			printf("4. Add a joint account\n");
-			printf("5. Withdraw from an existing account\n");
-			printf("6. Deposit into an existing account\n");
-			printf("7. Transfer between two existing accounts\n");
-			printf("8. Exit program\n");
-			
+			#ifdef DEBUG
+			printf("Invalid Menu Code\n");
+			#endif
+			break;
 	}
 }
 
@@ -649,15 +708,11 @@ void transfer()
  * - none
  Author: Ethan Goh/Mohamad Win
 *******************************************************************************/
-void encryptDecrypt(char *initial, char *changed) {
-	/*char key[] = {'F', 'C', 'B'};
-	
-	
-	
+void encryptDecrypt(char *initial, char *changed, char* pass) {
 	int i;
 	for(i = 0; i < strlen(initial); i++) {
-		changed[i] = initial[i] ^ key[i % (sizeof(key)/sizeof(char))];
-	}*/
+		changed[i] = initial[i] ^ pass[i % (sizeof(pass)/sizeof(char))];
+	}
 }
 
 /*******************************************************************************
@@ -1232,9 +1287,12 @@ int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ){
 	jointAccount_t readJoint;
 	int jointFlag = FALSE;
 	
+	#ifdef DEBUG
 	printf("Reading accounts from file\n");
+	#endif
 	
-	if((readPtr = fopen("database.bin", "rb")) != NULL){
+	readPtr = fopen("database.bin", "rb");
+	if(readPtr != NULL){
 		while( ( fgets(accountStr, 150, readPtr) != NULL )){
 			if(!jointFlag){
 				if(!strcmp("JOINTACCOUNT\n", accountStr)){
@@ -1253,7 +1311,9 @@ int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ){
 		success = TRUE;
 	}
 	
-	fclose(readPtr);
+	if(readPtr != NULL){
+		fclose(readPtr);
+	}
 	free(accountStr);
 	return success;
 }
