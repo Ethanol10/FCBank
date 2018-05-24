@@ -262,6 +262,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 		printf("What do you wish to change?\n");
 		printMenu(5);
 		scanf(" %d", &choice);
+		while(getchar() != '\n'){} /*Clear input buffer*/
 		while(loop==0)
 		{
 			switch(choice)
@@ -300,6 +301,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 		printf("What do you wish to change?\n");
 		printMenu(6);
 		scanf(" %d", &choice);
+		while(getchar() != '\n'){} /*Clear input buffer*/
 		while(loop==0)
 		{
 			switch(choice)
@@ -490,6 +492,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 		
 	printf("Do you wish to continue withdrawing? Y or N\n");
 	scanf(" %c", &confirmation);
+	while(getchar() != '\n'){} /*Clear input buffer*/
 	loop = 0;	
 		
 	while(loop==0)
@@ -500,6 +503,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
                     
                 printf("How much do you wish to withdraw? ");
 				scanf (" %lf", &amount);
+				while(getchar() != '\n'){} /*Clear input buffer*/
 				printf("\n");
 				/*Withdraw from a single account*/
 				if (temp_account != NULL && amount > 0)
