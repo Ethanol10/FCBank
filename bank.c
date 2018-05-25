@@ -48,7 +48,7 @@ void removeAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void withdraw(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void deposit(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
 void transfer();
-void encryptDecrypt(char *initial, char *changed, char* pass);
+void encryptDecrypt(FILE *initial, FILE *changed, char* pass);
 void compress();
 void decompress();
 void printMenu(int menuNo);
@@ -57,8 +57,8 @@ int isCorrectLogin(int userID, int userPin, nodeAcc_t* headS,
 void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ);
 void singleAccountCreation(nodeAcc_t* headS);
 void jointAccountCreation(nodeJAcc_t* headJ);
-int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ);
-int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ);
+int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass);
+int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass);
 account_t singleAccountStringSplit(char* accountStr);
 jointAccount_t jointAccountStringSplit(char* jAccountStr);
 
@@ -73,7 +73,15 @@ int main(int argc, char* argv[])
 	int userInput = 0;
 	nodeAcc_t* headAcc = malloc(sizeof(nodeAcc_t) * 1);
 	nodeJAcc_t* headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
+	int success;
+	FILE* passwordRewrite;
+	FILE* reXORPtr;
+	FILE* plainTxtPtr;
 
+#ifdef DEBUG
+	printf("DEBUG IS DEFINED. IF THIS IS NOT INTENDED,");
+	printf("PLEASE DISABLE DEBUG MODE IN THE SOURCE BEFORE COMPILING\n");
+#endif
 	/*PASSWORD LOADING*/
 	if( (passPtr = fopen("mps.txt", "r")) != NULL){
 		if(fgets(pass, MAX_PASS_CHAR, passPtr) != NULL){
@@ -89,7 +97,7 @@ int main(int argc, char* argv[])
 		printf("Specify a mode\n");
 		return 1;
 	} 
-	else if(strcmp(argv[1], "-norm!") == 0){
+	else if( (strcmp(argv[1], "-norm!") == 0)){
 		/*TEST INPUTS*/
 		/*Initialise the first head.*/
 /*		(*headAcc).account.id = 0;
@@ -98,8 +106,9 @@ int main(int argc, char* argv[])
 	*/	
 		printf("Please enter the master password -> \n");
 		scanf(" %20s", passInp);
+		while (getchar() != '\n') {} /*Clear input buffer*/
 		if(strcmp(passInp, pass) == 0){
-			if(loadAccountsFromFile(headAcc, headJointAcc)){
+			if(loadAccountsFromFile(headAcc, headJointAcc, pass)){
 				#ifdef DEBUG
 				printf("Accounts loaded successfully.\n");
 				#endif
@@ -107,7 +116,7 @@ int main(int argc, char* argv[])
 			else{
 				#ifdef DEBUG
 				printf("Accounts failed to load, ");
-				printf("or there were no Accounts to load.");
+				printf("or there were no Accounts to load.\n");
 				#endif
 			}
 
@@ -134,7 +143,7 @@ int main(int argc, char* argv[])
 			}
 
 			/*TEST FILE CREATION*/
-			if (saveAccountsToFile(headAcc, headJointAcc)) {
+			if (saveAccountsToFile(headAcc, headJointAcc, pass)) {
 				#ifdef DEBUG
 				printf("Success!\n");
 				#endif
@@ -153,6 +162,9 @@ int main(int argc, char* argv[])
 	else if(strcmp(argv[1], "-pass?") == 0){
 		printf("Please enter the master password ->\n");
 		scanf("%s", passInp);
+		char* newPass = malloc(sizeof(char)* 20);
+		char* confirmPass = malloc(sizeof(char) * 20);
+
 		if(strcmp(pass, passInp) == 0){
 			int userInput;
 			while(userInput != 3){
@@ -161,8 +173,53 @@ int main(int argc, char* argv[])
 				
 				switch(userInput){
 					case 1:/*Change master password*/
+						printf("Please input the new password:>\n");
+						scanf(" %s", newPass);
+						while (getchar() != '\n') {} /*Clear input buffer*/
+						printf("Please confirm the new password:\n");
+						scanf(" %s", confirmPass);
+						while (getchar() != '\n') {} /*Clear input buffer*/
+						
+						if (strcmp(newPass, confirmPass) == 0) {
+							passwordRewrite = fopen("mps.txt", "wb");
+							fputs(newPass, passwordRewrite);
+							fclose(passwordRewrite);
+						}
+						else {
+							printf("Passwords do not match.\n");
+						}
+						
+						/*Decrypting old database with the old master password.*/
+						reXORPtr = fopen("database.bin", "rb");
+						plainTxtPtr = fopen("plainTxt.bin", "wb");
+#ifdef DEBUG
+						printf("Decrypting old database with the old master password\n");
+#endif
+						encryptDecrypt(reXORPtr, plainTxtPtr, pass);
+						fclose(reXORPtr);
+						fclose(plainTxtPtr);
+						
+						/*Encrypting the plain text with a new master password*/
+						reXORPtr = fopen("database.bin", "wb");
+						plainTxtPtr = fopen("plainTxt.bin", "rb");
+#ifdef DEBUG
+						printf("Encrypting plain text with a new master password.\n");
+#endif
+						encryptDecrypt(plainTxtPtr, reXORPtr, newPass);
+						fclose(reXORPtr);
+						fclose(plainTxtPtr);
+
 						break;
-					case 2:/*Modify Database*/
+					case 2:/*Wipe Database*/
+						
+						success = remove("database.bin");
+
+						if (!(success)) {
+							printf("Database Deleted.\n");
+						}
+						else {
+							printf("Database already deleted.");
+						}
 						break;
 					case 3:/*Exit superuser*/
 						break;
@@ -702,16 +759,26 @@ void transfer()
 /*******************************************************************************
  * This function encrypts/decrypts the file holding a databse.
  * inputs:
- * - Pointer to first char in input string (char *initial)
- * - Pointer to first char in output string (char *changed)
+ * - Pointer to FILE (FILE* initial)
+ * - Pointer to FILE (FILE* changed)
+ * - Master password (char* pass)
  * outputs:
  * - none
  Author: Ethan Goh/Mohamad Win
 *******************************************************************************/
-void encryptDecrypt(char *initial, char *changed, char* pass) {
-	int i;
-	for(i = 0; i < strlen(initial); i++) {
-		changed[i] = initial[i] ^ pass[i % (sizeof(pass)/sizeof(char))];
+void encryptDecrypt(FILE *initial, FILE *changed, char* pass) {
+	int i = 0;
+	char c1;
+	char c2;
+
+	while ((c1 = fgetc(initial)) != EOF) {
+		c2 = c1 ^ pass[i % (sizeof(pass) / sizeof(char))];
+		i++;
+		if (fputc(c2, changed) == EOF) {
+			#ifdef DEBUG
+				printf("EOF reached");
+			#endif
+		}
 	}
 }
 
@@ -1191,71 +1258,73 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 * inputs:
 * - Head of linked list of single accounts (nodeAcc_t* headJ)
 * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+* - Encryption key (char* pass)
 * outputs:
-* - Integer indicating success in saving (int)
+* - Integer indicating success in saving (0 = Failure)(int)
 Author: Ethan Goh
 *******************************************************************************/
-int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ) {
+int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass) {
 	/*
 	WRITING FORMAT:
 	FOR SINGLE ACCOUNTS:
 	1) ID, PIN, BALANCE, FNAME, LNAME
-	
+
 	FOR JOINT ACCOUNTS:
 	1) ID1, ID2, PIN1, PIN2, BALANCE, FNAME1, LNAME1, FNAME2, LNAME2
-	
-	SINGLE ACCOUNTS ARE PRINTED FIRST, THEN ALL JOINT ACCOUNTS AFTERWARDS. 
-	*/
-	printf("Saving accounts to file\n");
 
+	SINGLE ACCOUNTS ARE PRINTED FIRST, THEN ALL JOINT ACCOUNTS AFTERWARDS.
+	*/
+#ifdef DEBUG
+	printf("Saving accounts to file\n");
+#endif
 	FILE* writePtr;
+	FILE* encryptData;
 	nodeAcc_t* currNode = headS;
 	nodeJAcc_t* currNodeJ = headJ;
 	int success = FALSE;
 
-	writePtr = fopen("database.bin", "wb");
+	writePtr = fopen("plainTxt.bin", "wb");
 
 	if (writePtr != NULL) {
 		while (currNode != NULL) {
-			fprintf(writePtr, "%d", (*currNode).account.id);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%d", (*currNode).account.pin);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%lf", (*currNode).account.balance);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%s", (*currNode).account.fname);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%s", (*currNode).account.lname);
-			fprintf(writePtr, "\n");
+			fprintf(writePtr, "%d ", (*currNode).account.id);
+			fprintf(writePtr, "%d ", (*currNode).account.pin);
+			fprintf(writePtr, "%lf ", (*currNode).account.balance);
+			fprintf(writePtr, "%s ", (*currNode).account.fname);
+			fprintf(writePtr, "%s\n", (*currNode).account.lname);
 			currNode = (*currNode).nextNode;
 		}
 
 		fprintf(writePtr, "JOINTACCOUNT\n");
 
 		while (currNodeJ != NULL) {
-			fprintf(writePtr, "%d", (*currNodeJ).account.userID1);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%d", (*currNodeJ).account.userID2);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%d", (*currNodeJ).account.userPin1);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%d", (*currNodeJ).account.userPin2);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%lf", (*currNodeJ).account.balance);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%s", (*currNodeJ).account.fname1);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%s", (*currNodeJ).account.lname1);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%s", (*currNodeJ).account.fname2);
-			fprintf(writePtr, " ");
-			fprintf(writePtr, "%s", (*currNodeJ).account.lname2);
-			fprintf(writePtr, "\n");
+			fprintf(writePtr, "%d ", (*currNodeJ).account.userID1);
+			fprintf(writePtr, "%d ", (*currNodeJ).account.userID2);
+			fprintf(writePtr, "%d ", (*currNodeJ).account.userPin1);
+			fprintf(writePtr, "%d ", (*currNodeJ).account.userPin2);
+			fprintf(writePtr, "%lf ", (*currNodeJ).account.balance);
+			fprintf(writePtr, "%s ", (*currNodeJ).account.fname1);
+			fprintf(writePtr, "%s ", (*currNodeJ).account.lname1);
+			fprintf(writePtr, "%s ", (*currNodeJ).account.fname2);
+			fprintf(writePtr, "%s\n", (*currNodeJ).account.lname2);
 			currNodeJ = (*currNodeJ).nextNode;
 		}
 		success = TRUE;
 	}
+	fclose(writePtr);
 
+	/*Encrypt before closing program*/
+	writePtr = fopen("plainTxt.bin", "rb");
+	encryptData = fopen("database.bin", "wb");
+	encryptDecrypt(writePtr, encryptData, pass);
+
+#ifndef DEBUG
+	/* If debug is enabled, the account file is saved as both an encrypted
+	file and a non-encrypted file.*/
+	success = !(remove("plainTxt.bin"));
+#endif
+
+	fclose(encryptData);
 	fclose(writePtr);
 	return success;
 }
@@ -1269,7 +1338,7 @@ int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ) {
 * - Integer indicating success in loading. (int)
 Author: Ethan Goh
 *******************************************************************************/
-int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ){
+int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass){
 	/*
 	WRITING FORMAT:
 	FOR SINGLE ACCOUNTS:
@@ -1282,39 +1351,52 @@ int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ){
 	*/
 	int success = FALSE;
 	FILE* readPtr;
+	FILE* decryptData;
 	char* accountStr = malloc(sizeof(char) * 150);
 	account_t readAccount;
 	jointAccount_t readJoint;
 	int jointFlag = FALSE;
-	
-	#ifdef DEBUG
+
+	decryptData = fopen("database.bin", "rb");
+	readPtr = fopen("plainTxt.bin", "wb");
+
+	encryptDecrypt(decryptData, readPtr, pass);
+
+	fclose(readPtr);
+	fclose(decryptData);
+
+#ifdef DEBUG
 	printf("Reading accounts from file\n");
-	#endif
-	
-	readPtr = fopen("database.bin", "rb");
-	if(readPtr != NULL){
-		while( ( fgets(accountStr, 150, readPtr) != NULL )){
-			if(!jointFlag){
-				if(!strcmp("JOINTACCOUNT\n", accountStr)){
+#endif
+
+	readPtr = fopen("plainTxt.bin", "rb");
+	if (readPtr != NULL) {
+		while ((fgets(accountStr, 150, readPtr) != NULL)) {
+			if (!jointFlag) {
+				if (!strcmp("JOINTACCOUNT\n", accountStr)) {
 					jointFlag = TRUE;
 				}
-				else{
+				else {
 					readAccount = singleAccountStringSplit(accountStr);
 					appendSingleAccNode(readAccount, headS);
 				}
 			}
-			else{
+			else {
 				readJoint = jointAccountStringSplit(accountStr);
 				appendJointAccNode(readJoint, headJ);
 			}
 		}
 		success = TRUE;
 	}
-	
-	if(readPtr != NULL){
+
+	if (readPtr != NULL) {
 		fclose(readPtr);
 	}
 	free(accountStr);
+
+#ifndef DEBUG
+	success = !(remove("plainTxt.bin"));
+#endif
 	return success;
 }
 
