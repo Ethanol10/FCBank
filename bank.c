@@ -73,7 +73,6 @@ int main(int argc, char* argv[])
 	int userInput = 0;
 	nodeAcc_t* headAcc = malloc(sizeof(nodeAcc_t) * 1);
 	nodeJAcc_t* headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
-	int success;
 	FILE* passwordRewrite;
 	FILE* reXORPtr;
 	FILE* plainTxtPtr;
@@ -94,10 +93,6 @@ int main(int argc, char* argv[])
 	fclose(passPtr);
 	
 	if(argc <= 1){
-		printf("Specify a mode\n");
-		return 1;
-	} 
-	else if( (strcmp(argv[1], "-norm!") == 0)){
 		/*TEST INPUTS*/
 		/*Initialise the first head.*/
 /*		(*headAcc).account.id = 0;
@@ -167,7 +162,7 @@ int main(int argc, char* argv[])
 
 		if(strcmp(pass, passInp) == 0){
 			int userInput;
-			while(userInput != 3){
+			while(userInput != 2){
 				printMenu(7);
 				scanf(" %d", &userInput);
 				
@@ -210,18 +205,7 @@ int main(int argc, char* argv[])
 						fclose(plainTxtPtr);
 
 						break;
-					case 2:/*Wipe Database*/
-						
-						success = remove("database.bin");
-
-						if (!(success)) {
-							printf("Database Deleted.\n");
-						}
-						else {
-							printf("Database already deleted.");
-						}
-						break;
-					case 3:/*Exit superuser*/
+					case 2:/*Exit superuser*/
 						break;
 				}
 			}
@@ -292,8 +276,7 @@ void printMenu(int menuNo)
 		case 7:
 			printf("Superuser Control\n");
 			printf("1. Change master password\n");
-			printf("2. Wipe database record\n");
-			printf("3. Exit superuser\n");
+			printf("2. Exit superuser\n");
 			break;
 		default:
 			#ifdef DEBUG
@@ -890,7 +873,7 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 						break;
 					case 4: /*Delete Account*/
 						removeAccount(currentUserID, headS, headJ);
-						
+						userInput = 6;
 						break;
 					case 5: /*Transfer funds to another account*/
 						transfer();
@@ -1359,8 +1342,13 @@ int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass){
 
 	decryptData = fopen("database.bin", "rb");
 	readPtr = fopen("plainTxt.bin", "wb");
-
-	encryptDecrypt(decryptData, readPtr, pass);
+	if (decryptData != NULL) {
+		encryptDecrypt(decryptData, readPtr, pass);
+	}
+	else {
+		success = FALSE;
+		return success;
+	}
 
 	fclose(readPtr);
 	fclose(decryptData);
