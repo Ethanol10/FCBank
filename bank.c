@@ -22,6 +22,7 @@
 
 /* Header files defined by group 26*/
 #include "linked_list_implementation.h"
+#include "huffman_coding.h"
 
 /*******************************************************************************
  * List preprocessing directives - you may define your own.
@@ -68,22 +69,46 @@ jointAccount_t jointAccountStringSplit(char* jAccountStr);
 int main(int argc, char* argv[])
 {	
 	FILE* passPtr;
+	FILE* decryptPass;
 	char pass[MAX_PASS_CHAR];
 	char passInp[MAX_PASS_CHAR];
+	char masterUser[MAX_PASS_CHAR];
 	int userInput = 0;
 	nodeAcc_t* headAcc = malloc(sizeof(nodeAcc_t) * 1);
 	nodeJAcc_t* headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
 	FILE* passwordRewrite;
 	FILE* reXORPtr;
 	FILE* plainTxtPtr;
+	int successUser = FALSE;
 
 #ifdef DEBUG
 	printf("DEBUG IS DEFINED. IF THIS IS NOT INTENDED,");
 	printf("PLEASE DISABLE DEBUG MODE IN THE SOURCE BEFORE COMPILING\n");
 #endif
+	/*
+		1) Get the Username from the user. decrypt the password.
+		2) if the password does not match, deny the user.
+	*/
 	/*PASSWORD LOADING*/
-	if( (passPtr = fopen("mps.txt", "r")) != NULL){
+	
+	printf("Please enter the username ->\n");
+	scanf(" %20s", masterUser);
+	while (getchar() != '\n') {} /*Clear input buffer*/
+	
+	passPtr = fopen("mp.txt", "rb");
+	decryptPass = fopen("mps.bin", "wb");
+	encryptDecrypt(passPtr, decryptPass, masterUser);
+	
+#ifdef DEBUG
+	printf("here's your username = %s\n", masterUser);
+#endif
+
+	fclose(passPtr);
+	fclose(decryptPass);
+	
+	if( (passPtr = fopen("mps.bin", "rb")) != NULL){
 		if(fgets(pass, MAX_PASS_CHAR, passPtr) != NULL){
+			successUser = TRUE;
 			#ifdef DEBUG
 				printf("Master password acquisition success: ");
 				printf("%s\n", pass);
@@ -92,7 +117,12 @@ int main(int argc, char* argv[])
 	}
 	fclose(passPtr);
 	
-	if(argc <= 1){
+	if(!successUser){
+		printf("Credentials incorrect, please try again,");
+		printf(" or contact the software developer.\n");
+		return 0;
+	}
+	if(argc <= 1 && successUser){
 		/*TEST INPUTS*/
 		/*Initialise the first head.*/
 /*		(*headAcc).account.id = 0;
@@ -148,6 +178,15 @@ int main(int argc, char* argv[])
 				printf("Accounts not saved\n");
 				#endif
 			}
+			
+			/*Open passPtr to read password, 
+				open decryptPass*/
+			passPtr = fopen("mps.bin", "rb");
+			decryptPass = fopen("mp.txt", "wb");
+			encryptDecrypt(passPtr, decryptPass, masterUser);
+			fclose(decryptPass);
+			fclose(passPtr);
+			remove("mps.bin");
 		}
 		else{
 			printf("Password Incorrect.\n");
@@ -157,17 +196,24 @@ int main(int argc, char* argv[])
 	else if(strcmp(argv[1], "-pass?") == 0){
 		printf("Please enter the master password ->\n");
 		scanf("%s", passInp);
-		char* newPass = malloc(sizeof(char)* 20);
-		char* confirmPass = malloc(sizeof(char) * 20);
+		char* newPass = malloc(sizeof(char)* MAX_PASS_CHAR);
+		char* confirmPass = malloc(sizeof(char) * MAX_PASS_CHAR);
 
 		if(strcmp(pass, passInp) == 0){
 			int userInput;
-			while(userInput != 2){
+			while(userInput != 3){
 				printMenu(7);
 				scanf(" %d", &userInput);
 				
 				switch(userInput){
-					case 1:/*Change master password*/
+					case 1: /*Change master username*/
+						printf("Please enter the new username\n");
+						scanf(" %20s", masterUser);
+						while (getchar() != '\n') {} /*Clear input buffer*/
+						
+						printf("Username successfully changed.\n");
+						break;
+					case 2:/*Change master password*/
 						printf("Please input the new password:>\n");
 						scanf(" %s", newPass);
 						while (getchar() != '\n') {} /*Clear input buffer*/
@@ -205,17 +251,26 @@ int main(int argc, char* argv[])
 						fclose(plainTxtPtr);
 
 						break;
-					case 2:/*Exit superuser*/
+					case 3:/*Exit superuser*/
 						break;
 				}
 			}
-		}
+					
+			passPtr = fopen("mps.bin", "rb");
+			decryptPass = fopen("mp.txt", "wb");
+			encryptDecrypt(passPtr, decryptPass, masterUser);
+			fclose(decryptPass);
+			fclose(passPtr);
+#ifndef DEBUG
+				remove("mps.bin");
+#endif
+		}		
 		else{
 			printf("Password incorrect.\n");
 		}
 		return 0;
 	}
-	return 1;
+	return 0;
 }
 
 /*******************************************************************************
@@ -275,8 +330,9 @@ void printMenu(int menuNo)
 			break;	
 		case 7:
 			printf("Superuser Control\n");
-			printf("1. Change master password\n");
-			printf("2. Exit superuser\n");
+			printf("1. Change master username\n");
+			printf("2. Change master password\n");
+			printf("3. Exit superuser\n");
 			break;
 		default:
 			#ifdef DEBUG
