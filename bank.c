@@ -601,7 +601,8 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
 	int loop = 0;
-	char confirmation;
+	char confirmation[2];
+	char secondConfirm;
 	double amount;
 	nodeAcc_t* temp_account;
 	nodeJAcc_t* temp_joint;
@@ -646,11 +647,19 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 	}
 		
 	printf("Do you wish to continue withdrawing? Y or N\n");
-	scanf(" %c", &confirmation);
+	scanf(" %s", confirmation);
+	while(strlen(confirmation)>1)
+		{
+			printf("Invalid input. Please try again.\n");
+			printf("Do you wish to continue withdrawing? SSSY or N\n");
+			scanf(" %s", confirmation);
+		}
+		
+	secondConfirm = confirmation[0];
 	while(getchar() != '\n'){} /*Clear input buffer*/
 	loop = 0;	
 
-		switch(confirmation)
+		switch(secondConfirm)
 		{
 			case 'Y': /*Yes to withdraw*/
                     
@@ -667,7 +676,6 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 					printf("Your new balance is $%.2lf.\n", 
 					(*temp_account).account.balance);	
                     printf("\n");
-                    withdraw(currentUserID, headS, headJ);
 				}
 				
 				else if(temp_account != NULL && (*temp_account).account.balance<amount)
@@ -680,8 +688,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 					(*temp_joint).account.balance = (*temp_joint).account.balance - amount;
 					printf("Your withdraw is successful.\n");
 			        printf("Your new balance is $%.2lf.\n", (*temp_joint).account.balance);
-			        printf("\n");
-			        withdraw(currentUserID, headS, headJ);			  
+			        printf("\n");			  
 				}
 				
 				else if(temp_joint != NULL && (*temp_joint).account.balance<amount)
@@ -794,10 +801,98 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
  * - none
  Author: 
 *******************************************************************************/
-void transfer()
+void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 {
+	int loop = 0,check;
+	char confirmation;
+	double amount;
+
+	nodeAcc_t* temp_account;
+	nodeJAcc_t* temp_joint;
+	nodeAcc_t* temp_account2;
+	nodeJAcc_t* temp_joint2;
 	
+	temp_joint = findJointNode (*currentUserID, headJ);
+    temp_account = findSingleNode (*currentUserID, headS);
+	
+	while(loop == 0)
+	{
+		if(temp_account != NULL && (*temp_account).account.balance>0 ) 
+		{  
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_account).account.balance);
+			loop =1;
+		}
+		/*If balance is too low, user cannot transfer*/
+		else if(temp_account == NULL && (*temp_account).account.balance<=0)
+		{
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_account).account.balance);
+			printf("Your balance is too low to transfer.\n");
+			printf("Returning to main menu.\n");
+			loop = 1;
+		}
+	
+		else if (temp_joint != NULL && (*temp_joint).account.balance>0)
+		{
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_joint).account.balance);
+			loop =1;
+		}
+		/*If balance is too low, user cannot transfer*/
+		else if(temp_joint != NULL && (*temp_joint).account.balance<=0)
+		{
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_joint).account.balance);
+			printf("Your balance is too low to transfer.\n");
+			printf("Returning to main menu.\n");
+			loop = 1;
+		}
+	}
+	
+	printf("Do you wish to continue transferring? Y or N\n");
+	scanf(" %c", &confirmation);
+	while(getchar() != '\n'){} /*Clear input buffer*/
+	loop = 0;	
+	
+	switch(confirmation)
+	{
+	    case 'Y':
+	        printf("Please enter the ID of the account you wish");
+	        printf(" to transfer to\n");
+	        scanf(" %d", &check);
+	        while(getchar() != '\n'){} /*Clear input buffer*/
+	        
+	        int* accID;
+        	accID = &check;
+        	temp_joint2 = findJointNode (*accID, headJ);
+            temp_account2 = findSingleNode (*accID, headS);
+        	#ifdef DEBUG
+	        printf("%d\n", *accID);
+        	#endif
+        	
+        	if (temp_account != NULL && check < 0)
+        	{
+        	    printf("Your balance is inefficient.\n");       
+        	}
+        	
+        	if (temp_account != NULL && check > 0)
+        	{
+        	    printf("Please enter the amount you would like to transfer:\n");
+        	    scanf("%lf", &amount);
+        	}
+	        break;
+	        
+        case 'N':
+            /* No to transfer */
+            break;
+            
+        default:
+            printf("Invalid input, please try again.\n");
+            break;    	        
+	}
 }
+
 
 /*******************************************************************************
  * This function encrypts/decrypts the file holding a databse.
