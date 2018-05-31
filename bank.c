@@ -630,6 +630,9 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 	/* check how much is in the balance*/
 	while(loop == 0)
 	{
+		#ifdef DEBUG
+		printf("entering withdraw loop\n");
+		#endif
 		if(temp_account != NULL && (*temp_account).account.balance>0 ) 
 		{  
 			printf("Your current balance is $%.2lf.\n", 
@@ -637,7 +640,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 			loop =1;
 		}
 		/*If balance is too low, user cannot withdraw*/
-		else if(temp_account == NULL && (*temp_account).account.balance<=0)
+		else if(temp_account != NULL && (*temp_account).account.balance<=0)
 		{
 			printf("Your current balance is $%.2lf.\n", 
 			(*temp_account).account.balance);
@@ -685,7 +688,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				while(getchar() != '\n'){} /*Clear input buffer*/
 				printf("\n");
 				/*Withdraw from a single account*/
-				if (temp_account != NULL && (*temp_account).account.balance>amount)
+				if (temp_account != NULL && (*temp_account).account.balance>=amount)
 				{
 				    (*temp_account).account.balance = 
 					(*temp_account).account.balance - amount;
@@ -700,7 +703,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				    printf("Sorry, you have insufficient funds.\n");
 				}
 				/*Withdraw from the joint account*/   
-				else if (temp_joint !=NULL && (*temp_joint).account.balance>amount)
+				else if (temp_joint !=NULL && (*temp_joint).account.balance>=amount)
 			    {
 					(*temp_joint).account.balance = (*temp_joint).account.balance - amount;
 					printf("Your withdraw is successful.\n");
@@ -1209,8 +1212,8 @@ void singleAccountCreation(nodeAcc_t* headS){
 		scanf(" %4s", pin);
 		while(getchar() != '\n'){} /*Clear input buffer*/
 		letterFound = FALSE;
-		for(i = 0; i < 5; i++){
-			if(pin[i] <= '0' && pin[i] >= '9'){
+		for(i = 0; i < 4; i++){
+			if(pin[i] <= '0' || pin[i] >= '9'){
 				letterFound = TRUE;
 				i = 5;
 			}
