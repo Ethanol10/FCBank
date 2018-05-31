@@ -626,7 +626,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 			(*temp_account).account.balance);
 			printf("Your balance is too low to withdraw.\n");
 			printf("Returning to main menu.\n");
-			loop = 1;
+			return;
 		}
 	
 		else if (temp_joint != NULL && (*temp_joint).account.balance>0)
@@ -642,7 +642,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 			(*temp_joint).account.balance);
 			printf("Your balance is too low to withdraw.\n");
 			printf("Returning to main menu.\n");
-			loop = 1;
+			return;
 		}
 	}
 		
