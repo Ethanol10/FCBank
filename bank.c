@@ -671,7 +671,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 	while(strlen(confirmation)>1)
 		{
 			printf("Invalid input. Please try again.\n");
-			printf("Do you wish to continue withdrawing? SSSY or N\n");
+			printf("Do you wish to continue withdrawing? Y or N\n");
 			scanf(" %s", confirmation);
 		}
 		
