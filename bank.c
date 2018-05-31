@@ -909,6 +909,7 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
             temp_account2 = findSingleNode (*accID, headS);
         	printf("Please enter the amount you would like to transfer: $");
         	scanf(" %s", transfer_money);
+        	while(getchar() != '\n'){} /*Clear input buffer*/
         	printf("\n");
 		    letterFound = FALSE;
 		    for(i = 0; i < strlen(transfer_money); i++){
@@ -928,8 +929,7 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
                 sscanf(transfer_money, " %lf", &amount);
         	if (temp_account2 != NULL && temp_account != NULL && 
         	temp_joint == NULL && temp_joint2 == NULL)
-        	{    
-        	    while(getchar() != '\n'){} /*Clear input buffer*/
+        	{       
         	    (*temp_account).account.balance = 
         	    (*temp_account).account.balance - amount;
         	    (*temp_account2).account.balance += amount;
@@ -940,7 +940,6 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
         	else if (temp_account2 == NULL && temp_account != NULL && 
         	temp_joint == NULL && temp_joint2 != NULL)
         	{
-        	    while(getchar() != '\n'){} /*Clear input buffer*/
         	    (*temp_account).account.balance = 
         	    (*temp_account).account.balance - amount;
         	    (*temp_joint2).account.balance += amount;
@@ -951,7 +950,6 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
         	else if (temp_account2 != NULL && temp_account == NULL && 
         	temp_joint != NULL && temp_joint2 == NULL)
         	{
-        	    while(getchar() != '\n'){} /*Clear input buffer*/
         	    (*temp_joint).account.balance = 
         	    (*temp_joint).account.balance - amount;
         	    (*temp_account2).account.balance += amount;
@@ -962,7 +960,6 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
         	else if (temp_account2 == NULL && temp_account == NULL && 
         	temp_joint != NULL && temp_joint2 != NULL)
         	{
-        	    while(getchar() != '\n'){} /*Clear input buffer*/
         	    (*temp_account).account.balance = 
         	    (*temp_account).account.balance - amount;
         	    (*temp_account2).account.balance += amount;
