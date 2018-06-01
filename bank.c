@@ -81,6 +81,7 @@ int main(int argc, char* argv[])
 #ifdef DEBUG
 	printf("DEBUG IS DEFINED. IF THIS IS NOT INTENDED,");
 	printf("PLEASE DISABLE DEBUG MODE IN THE SOURCE BEFORE COMPILING\n");
+	printf("\nPLEASE READ THE README.\n");
 #endif
 	/*
 		1) Get the Username from the user. decrypt the password.
@@ -1081,6 +1082,7 @@ int isCorrectLogin(int userID,
 	testAcc = findSingleNode(userID, headS_p);
 	testJoint = findJointNode(userID, headJ_p);
 	
+	/*Check if account has correct credentials*/
 	if(testAcc != NULL){
 		if((*testAcc).account.pin == userPin){
 			return TRUE;
@@ -1536,6 +1538,7 @@ int saveAccountsToFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass) {
 	writePtr = fopen("plainTxt.bin", "wb");
 
 	if (writePtr != NULL) {
+		/*Writing Single Accounts*/
 		while (currNode != NULL) {
 			fprintf(writePtr, "%d ", (*currNode).account.id);
 			fprintf(writePtr, "%d ", (*currNode).account.pin);
@@ -1547,6 +1550,7 @@ int saveAccountsToFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass) {
 
 		fprintf(writePtr, "JOINTACCOUNT\n");
 
+		/*Writing Joint Accounts*/
 		while (currNodeJ != NULL) {
 			fprintf(writePtr, "%d ", (*currNodeJ).account.userID1);
 			fprintf(writePtr, "%d ", (*currNodeJ).account.userID2);
@@ -1608,6 +1612,7 @@ int loadAccountsFromFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass){
 	jointAccount_t readJoint;
 	int jointFlag = FALSE;
 
+	/*Decrypting data*/
 	decryptData = fopen("database.bin", "rb");
 	readPtr = fopen("plainTxt.bin", "wb");
 	if (decryptData != NULL) {
@@ -1625,6 +1630,7 @@ int loadAccountsFromFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass){
 	printf("Reading accounts from file\n");
 #endif
 
+	/*Assign plain text to variables in linked list.*/
 	readPtr = fopen("plainTxt.bin", "rb");
 	if (readPtr != NULL) {
 		while ((fgets(accountStr, 150, readPtr) != NULL)) {
