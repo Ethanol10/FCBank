@@ -42,21 +42,21 @@
  * Function prototypes. As the project is being developed, more function 
  declarations may be added.
 *******************************************************************************/
-void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ); 
-void editAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ); 
-void removeAccount(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
-void withdraw(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
-void deposit(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
-void transfer(int* userID, nodeAcc_t* headS, nodeJAcc_t* headJ);
+void addAccount(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p); 
+void editAccount(int* userID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p); 
+void removeAccount(int* userID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p);
+void withdraw(int* userID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p);
+void deposit(int* userID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p);
+void transfer(int* userID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p);
 void encryptDecrypt(FILE *initial, FILE *changed, char* pass);
 void printMenu(int menuNo);
-int isCorrectLogin(int userID, int userPin, nodeAcc_t* headS, 
-					nodeJAcc_t* headJ);
-void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ);
-void singleAccountCreation(nodeAcc_t* headS);
-void jointAccountCreation(nodeJAcc_t* headJ);
-int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass);
-int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass);
+int isCorrectLogin(int userID, int userPin, nodeAcc_t* headS_p, 
+					nodeJAcc_t* headJ_p);
+void loginUser(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p);
+void singleAccountCreation(nodeAcc_t* headS_p);
+void jointAccountCreation(nodeJAcc_t* headJ_p);
+int saveAccountsToFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass);
+int loadAccountsFromFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass);
 account_t singleAccountStringSplit(char* accountStr);
 jointAccount_t jointAccountStringSplit(char* jAccountStr);
 
@@ -71,9 +71,9 @@ int main(int argc, char* argv[])
 	char passInp[MAX_PASS_CHAR];
 	char masterUser[MAX_PASS_CHAR];
 	int userInput = 0;
-	nodeAcc_t* headAcc = malloc(sizeof(nodeAcc_t) * 1);
-	nodeJAcc_t* headJointAcc = malloc(sizeof(nodeJAcc_t) * 1);
-	FILE* passwordRewrite;
+	nodeAcc_t* headAcc_p = malloc(sizeof(nodeAcc_t) * 1);
+	nodeJAcc_t* headJointAcc_p = malloc(sizeof(nodeJAcc_t) * 1);
+	FILE* passwordRewritePtr;
 	FILE* reXORPtr;
 	FILE* plainTxtPtr;
 	int successUser = FALSE;
@@ -122,15 +122,15 @@ int main(int argc, char* argv[])
 	if(argc <= 1 && successUser){
 		/*TEST INPUTS*/
 		/*Initialise the first head.*/
-/*		(*headAcc).account.id = 0;
-		(*headJointAcc).account.userID1 = 0;
-		(*headJointAcc).account.userID2 = 0;
+/*		(*headAcc_p).account.id = 0;
+		(*headJointAcc_p).account.userID1 = 0;s
+		(*headJointAcc_p).account.userID2 = 0;
 	*/	
 		printf("Please enter the master password -> \n");
 		scanf(" %20s", passInp);
 		while (getchar() != '\n') {} /*Clear input buffer*/
 		if(strcmp(passInp, pass) == 0){
-			if(loadAccountsFromFile(headAcc, headJointAcc, pass)){
+			if(loadAccountsFromFile(headAcc_p, headJointAcc_p, pass)){
 				#ifdef DEBUG
 				printf("Accounts loaded successfully.\n");
 				#endif
@@ -151,10 +151,10 @@ int main(int argc, char* argv[])
 
 				switch (userInput) {
 				case 1: /* User Log in*/
-					loginUser(headAcc, headJointAcc);
+					loginUser(headAcc_p, headJointAcc_p);
 					break;
 				case 2: /* Creating a new account*/
-					addAccount(headAcc, headJointAcc);
+					addAccount(headAcc_p, headJointAcc_p);
 					break;
 				case 3: /*Exit the program*/
 					break;
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
 			}
 
 			/*TEST FILE CREATION*/
-			if (saveAccountsToFile(headAcc, headJointAcc, pass)) {
+			if (saveAccountsToFile(headAcc_p, headJointAcc_p, pass)) {
 				#ifdef DEBUG
 				printf("Success!\n");
 				#endif
@@ -224,9 +224,9 @@ int main(int argc, char* argv[])
 						while (getchar() != '\n') {} /*Clear input buffer*/
 						
 						if (strcmp(newPass, confirmPass) == 0) {
-							passwordRewrite = fopen("mps.bin", "wb");
-							fputs(newPass, passwordRewrite);
-							fclose(passwordRewrite);
+							passwordRewritePtr = fopen("mps.bin", "wb");
+							fputs(newPass, passwordRewritePtr);
+							fclose(passwordRewritePtr);
 						}
 						else {
 							printf("Passwords do not match.\n");
@@ -349,13 +349,13 @@ void printMenu(int menuNo)
 /*******************************************************************************
  * This function creates a new account and places it in the linked list.
  * inputs:
- * - Head of linked list of single accounts (nodeAcc_t* headS)
- * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+ * - Head of linked list of single accounts (nodeAcc_t* headS_p)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ_p)
  * outputs:
  * - none
  Author: Ethan Goh
 *******************************************************************************/
-void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ)
+void addAccount(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 {
 	int userInput = 0;
 	
@@ -366,11 +366,11 @@ void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ)
 		
 		switch(userInput){			
 			case 1: /*Single Account*/
-				singleAccountCreation(headS);
+				singleAccountCreation(headS_p);
 				userInput = 3;
 				break;
 			case 2: /*Joint Account*/
-				jointAccountCreation(headJ);
+				jointAccountCreation(headJ_p);
 				userInput = 3;
 				break;
 			case 3:	/*Exit Menu*/
@@ -388,19 +388,19 @@ void addAccount(nodeAcc_t* headS, nodeJAcc_t* headJ)
  * - edited account
  Author: Mohamad Win
 *******************************************************************************/
-void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
+void editAccount(int* currentUserID_p, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 {
 	int choice, newPin;
 	char newFName[MAX_NAME_LEN];
 	char newLName[MAX_NAME_LEN];
 	int loop = 0;
-	nodeAcc_t* temp_account;
-    nodeJAcc_t* temp_joint;
+	nodeAcc_t* temp_account_p;
+    nodeJAcc_t* temp_joint_p;
 	
-	temp_joint = findJointNode (*currentUserID, headJ);
-    temp_account = findSingleNode (*currentUserID, headS);
+	temp_joint_p = findJointNode (*currentUserID_p, headJ_p);
+    temp_account_p = findSingleNode (*currentUserID_p, headS_p);
 	
-	if(temp_account != NULL && temp_joint == NULL)
+	if(temp_account_p != NULL && temp_joint_p == NULL)
 	{
 		printf("What do you wish to change?\n");
 		printMenu(5);
@@ -414,7 +414,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				printf("Please enter your new first name\n");
 				scanf("%s", newFName);
 				while(getchar() != '\n'){} /*Clear input buffer*/
-				strcpy((*temp_account).account.fname, newFName);
+				strcpy((*temp_account_p).account.fname, newFName);
 				printf("Your first name has been changed.\n");
 				loop=1;
 					break;
@@ -422,7 +422,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				printf("Please enter your new last name\n");
 				scanf("%s", newLName);
 				while(getchar() != '\n'){} /*Clear input buffer*/
-				strcpy((*temp_account).account.lname, newLName);
+				strcpy((*temp_account_p).account.lname, newLName);
 				printf("Your last name has been changed.\n");
 				loop=1;
 					break;
@@ -430,7 +430,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				printf("Please enter your new desired PIN\n");
 				scanf("%d", &newPin);
 				while(getchar() != '\n'){} /*Clear input buffer*/
-				(*temp_account).account.pin = newPin;
+				(*temp_account_p).account.pin = newPin;
 				printf("Your PIN number has been changed.\n");
 				loop =1;
 					break;
@@ -441,7 +441,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 		}
 	}
 	
-	else if (temp_joint != NULL && temp_account == NULL)
+	else if (temp_joint_p!= NULL && temp_account_p == NULL)
 	{	
 		loop =0;
 		printf("What do you wish to change?\n");
@@ -456,7 +456,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 					printf("Please enter your new first name\n");
 					scanf("%s", newFName);
 					while(getchar() != '\n'){} /*Clear input buffer*/
-					strcpy((*temp_joint).account.fname1, newFName);
+					strcpy((*temp_joint_p).account.fname1, newFName);
 					printf("Your first name has been changed.\n");
 					loop =1;
 					break;
@@ -464,7 +464,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 					printf("Please enter your new last name\n");
 					scanf("%s", newLName);
 					while(getchar() != '\n'){} /*Clear input buffer*/
-					strcpy((*temp_joint).account.lname1, newLName);
+					strcpy((*temp_joint_p).account.lname1, newLName);
 					printf("Your last name has been changed.\n");
 					loop =1;
 					break;
@@ -472,7 +472,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 					printf("Please enter your new desired PIN\n");
 					scanf("%d", &newPin);
 					while(getchar() != '\n'){} /*Clear input buffer*/
-					(*temp_joint).account.userPin1 = newPin;
+					(*temp_joint_p).account.userPin1 = newPin;
 					printf("Your PIN number has been changed.\n");
 					loop =1;
 					break;
@@ -480,14 +480,14 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 					printf("Please enter your new first name\n");
 					scanf("%s", newFName);
 					while(getchar() != '\n'){} /*Clear input buffer*/
-					strcpy((*temp_joint).account.fname2, newFName);
+					strcpy((*temp_joint_p).account.fname2, newFName);
 					printf("Your first name has been changed.\n");
 					loop =1;
 					break;
 				case 5: /*Second User's Last Name*/
 					printf("Please enter your new last name\n");
 					scanf("%s", newLName);
-					strcpy((*temp_joint).account.lname2, newLName);
+					strcpy((*temp_joint_p).account.lname2, newLName);
 					printf("Your last name has been changed.\n");
 					loop=1;
 					break;
@@ -495,7 +495,7 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 					printf("Please enter your new desired PIN\n");
 					scanf("%d", &newPin);
 					while(getchar() != '\n'){} /*Clear input buffer*/
-					(*temp_joint).account.userPin2 = newPin;
+					(*temp_joint_p).account.userPin2 = newPin;
 					printf("Your PIN number has been changed.\n");
 					loop =1;
 					break;	
@@ -518,12 +518,12 @@ void editAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
  * none
  Author: Ngoc Thao Han Ho
 *******************************************************************************/
-void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
+void removeAccount(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 {
     char sure_or_not[2];
     char balance_check[2];
     nodeAcc_t* temp_account;
-    nodeJAcc_t* temp_joint;
+    nodeJAcc_t* temp_joint_p;
 
     printf("Are you sure to delete your account? (Y/N) ");
     scanf(" %s", sure_or_not);
@@ -532,25 +532,25 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
     if (sure_or_not[1]!='\0')
     {
       printf("Invalid input, please try again.\n");
-	  removeAccount(currentUserID, headS, headJ);
+	  removeAccount(currentUserID, headS_p, headJ_p);
 	}
 	else
 	{
     switch (sure_or_not[0])
     {
        case 'Y': /*Yes to delete*/
-                temp_account = findSingleNode (*currentUserID, headS);
-                temp_joint = findJointNode (*currentUserID, headJ);
+                temp_account = findSingleNode (*currentUserID, headS_p);
+                temp_joint_p = findJointNode (*currentUserID, headJ_p);
 		
-			    if(temp_account != NULL && temp_joint == NULL) 
+			    if(temp_account != NULL && temp_joint_p == NULL) 
 			    {  
 	    	       printf("You still have $%.2lf as balance in your account.\n", 
 	    	                                   (*temp_account).account.balance);
 			    }
-			    else if (temp_joint != NULL && temp_account == NULL)
+			    else if (temp_joint_p != NULL && temp_account == NULL)
                 {
                    printf("You still have $%.2lf as balance in your account.\n", 
-                                                 (*temp_joint).account.balance); 
+                                                 (*temp_joint_p).account.balance); 
                 }
                           
 			    printf("Your balance will be lost after");
@@ -562,19 +562,19 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 			    if (balance_check[1]!='\0')
                 {
                 printf("Invalid input, please try again.\n");
-	            removeAccount(currentUserID, headS, headJ);
+	            removeAccount(currentUserID, headS_p, headJ_p);
 	            }
 	            else
 	            {
 			    if (balance_check[0]=='Y')
 	            {
-		          if (temp_account != NULL && temp_joint == NULL)
+		          if (temp_account != NULL && temp_joint_p == NULL)
   	              {
-		              removeSingleAccNode((*temp_account).account, headS);
+		              removeSingleAccNode((*temp_account).account, headS_p);
     		      }
-		          else if (temp_joint != NULL && temp_account == NULL)
+		          else if (temp_joint_p != NULL && temp_account == NULL)
     	          {
-				      removeJointAccNode((*temp_joint).account, headJ);
+				      removeJointAccNode((*temp_joint_p).account, headJ_p);
 			      }
 	            printf("Your account was successfully deleted.\n");
 	            break;
@@ -586,7 +586,7 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 			    else
 			    {
 			       printf("Invalid input, please try again.\n");
-                   removeAccount(currentUserID, headS, headJ);
+                   removeAccount(currentUserID, headS_p, headJ_p);
 			    }
 			    }
 				break;
@@ -597,7 +597,7 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				
 	   default:
 	            printf("\nInvalid input, please try again.\n");
-	            removeAccount(currentUserID, headS, headJ);
+	            removeAccount(currentUserID, headS_p, headJ_p);
 	            
     }
     }
@@ -609,23 +609,23 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
  input.
  * inputs:
  * - Integer holding Bank ID (int userID)
- * - Head of linked list of single accounts (nodeAcc_t* headS)
- * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+ * - Head of linked list of single accounts (nodeAcc_t* headS_p)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ_p)
  * outputs:
  * - none
  Author: Mohamad Win
 *******************************************************************************/
-void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
+void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 {
 	int loop = 0;
 	char confirmation[2];
 	char secondConfirm;
 	double amount;
 	nodeAcc_t* temp_account;
-	nodeJAcc_t* temp_joint;
+	nodeJAcc_t* temp_joint_p;
 	
-	temp_joint = findJointNode (*currentUserID, headJ);
-    temp_account = findSingleNode (*currentUserID, headS);	
+	temp_joint_p = findJointNode (*currentUserID, headJ_p);
+    temp_account = findSingleNode (*currentUserID, headS_p);	
 	
 	/* check how much is in the balance*/
 	while(loop == 0)
@@ -649,17 +649,17 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 			return;
 		}
 	
-		else if (temp_joint != NULL && (*temp_joint).account.balance>0)
+		else if (temp_joint_p != NULL && (*temp_joint_p).account.balance>0)
 		{
 			printf("Your current balance is $%.2lf.\n", 
-			(*temp_joint).account.balance);
+			(*temp_joint_p).account.balance);
 			loop =1;
 		}
 		/*If balance is too low, user cannot withdraw*/
-		else if(temp_joint != NULL && (*temp_joint).account.balance<=0)
+		else if(temp_joint_p != NULL && (*temp_joint_p).account.balance<=0)
 		{
 			printf("Your current balance is $%.2lf.\n", 
-			(*temp_joint).account.balance);
+			(*temp_joint_p).account.balance);
 			printf("Your balance is too low to withdraw.\n");
 			printf("Returning to main menu.\n");
 			return;
@@ -698,20 +698,24 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
                     printf("\n");
 				}
 				
-				else if(temp_account != NULL && (*temp_account).account.balance<amount)
+				else if(temp_account != NULL &&
+				     (*temp_account).account.balance<amount)
 				{
 				    printf("Sorry, you have insufficient funds.\n");
 				}
 				/*Withdraw from the joint account*/   
-				else if (temp_joint !=NULL && (*temp_joint).account.balance>=amount)
+				else if (temp_joint_p !=NULL && 
+				    (*temp_joint_p).account.balance>=amount)
 			    {
-					(*temp_joint).account.balance = (*temp_joint).account.balance - amount;
+					(*temp_joint_p).account.balance = 
+					    (*temp_joint_p).account.balance - amount;
 					printf("Your withdraw is successful.\n");
-			        printf("Your new balance is $%.2lf.\n", (*temp_joint).account.balance);
+			        printf("Your new balance is $%.2lf.\n", 
+			            (*temp_joint_p).account.balance);
 			        printf("\n");			  
 				}
 				
-				else if(temp_joint != NULL && (*temp_joint).account.balance<amount)
+				else if(temp_joint_p != NULL && (*temp_joint_p).account.balance<amount)
 				{
 				    printf("Sorry, you have insufficient funds.\n");
 				}
@@ -723,7 +727,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				
 			default:
 				printf("Invalid input, please try again.\n");
-				withdraw(currentUserID, headS, headJ);
+				withdraw(currentUserID, headS_p, headJ_p);
 				break;
 		}
 	
@@ -733,24 +737,24 @@ void withdraw(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
  * This function allows the user to deposit money into their account.
  * inputs:
  * - Integer holding Bank ID (int userID)
- * - Head of linked list of single accounts (nodeAcc_t* headS)
- * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+ * - Head of linked list of single accounts (nodeAcc_t* headS_p)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ_p)
  * outputs:
  * - none
  Author: Ngoc Thao Han Ho
 *******************************************************************************/
-void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
+void deposit(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 {
 	char want_or_not[2];
 	char add_money[100];
     nodeAcc_t* temp_account;
-    nodeJAcc_t* temp_joint;
+    nodeJAcc_t* temp_joint_p;
     int i;
     int letterFound;
     double amount;
     
-    temp_joint = findJointNode (*currentUserID, headJ);
-    temp_account = findSingleNode (*currentUserID, headS);	
+    temp_joint_p = findJointNode (*currentUserID, headJ_p);
+    temp_account = findSingleNode (*currentUserID, headS_p);	
     
     /* check how much is in the balance*/
 	if(temp_account != NULL) 
@@ -758,10 +762,10 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 		printf("Your current balance is $%.2lf.\n", 
 		                            (*temp_account).account.balance);
     }
-	else if (temp_joint != NULL)
+	else if (temp_joint_p != NULL)
     {
         printf("Your current balance is $%.2lf.\n", 
-                                    (*temp_joint).account.balance);
+                                    (*temp_joint_p).account.balance);
     }
     
     /*second question to make sure user want to delete their account*/
@@ -771,7 +775,7 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
     if (want_or_not[1]!='\0')
     {
       printf("Invalid input, please try again.\n");
-	  deposit(currentUserID, headS, headJ);
+	  deposit(currentUserID, headS_p, headJ_p);
 	}
 	else
     {
@@ -795,7 +799,7 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 		            if (letterFound)
 		            {
 		                printf("\nInvalid input, please try again.\n");
-				        deposit(currentUserID, headS, headJ);
+				        deposit(currentUserID, headS_p, headJ_p);
 		            }
 		            else
 		            {
@@ -808,23 +812,23 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				        printf("Your new balance is $%.2lf.\n", 
 				                               (*temp_account).account.balance);
 				        printf("\n");
-				        deposit(currentUserID, headS, headJ);   
+				        deposit(currentUserID, headS_p, headJ_p);   
 				    }
 				    
 				    /* deposit in joint account*/
-				    else if (temp_joint !=NULL && amount > 0) 
+				    else if (temp_joint_p !=NULL && amount > 0) 
 				    {
-				        (*temp_joint).account.balance += amount;
+				        (*temp_joint_p).account.balance += amount;
 				        printf("Your deposit is successful.\n");
 				        printf("Your new balance is $%.2lf.\n", 
-				                                (*temp_joint).account.balance);
+				                                (*temp_joint_p).account.balance);
 				        printf("\n");
-				        deposit(currentUserID, headS, headJ);
+				        deposit(currentUserID, headS_p, headJ_p);
 				    }
 				    else
 				    {
 				        printf("\nInvalid input, please try again.\n");
-				        deposit(currentUserID, headS, headJ);
+				        deposit(currentUserID, headS_p, headJ_p);
 				    }
 				    } 
 				    break;
@@ -835,7 +839,7 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 				
 	   default:
 	            printf("\nInvalid input, please try again.\n");
-	            deposit(currentUserID, headS, headJ);	            
+	            deposit(currentUserID, headS_p, headJ_p);	            
     }
     }
 }
@@ -849,7 +853,7 @@ void deposit(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
  * - none
  Author: 
 *******************************************************************************/
-void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
+void transfer(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 {
 	int loop = 0,check;
 	char confirmation[2];
@@ -859,26 +863,26 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
     double amount;
 
 	nodeAcc_t* temp_account;
-	nodeJAcc_t* temp_joint;
+	nodeJAcc_t* temp_joint_p;
 	nodeAcc_t* temp_account2;
-	nodeJAcc_t* temp_joint2;
+	nodeJAcc_t* temp_joint_p2;
 	
-	temp_joint = findJointNode (*currentUserID, headJ);
-    temp_account = findSingleNode (*currentUserID, headS);
+	temp_joint_p = findJointNode (*currentUserID, headJ_p);
+    temp_account = findSingleNode (*currentUserID, headS_p);
 	
 	while(loop == 0)
 	{
-		if(temp_account != NULL && temp_joint == NULL) 
+		if(temp_account != NULL && temp_joint_p == NULL) 
 		{  
 			printf("Your current balance is $%.2lf.\n", 
 			(*temp_account).account.balance);
 			loop =1;
 		}
 	
-		else if (temp_joint != NULL && temp_account == NULL)
+		else if (temp_joint_p != NULL && temp_account == NULL)
 		{
 			printf("Your current balance is $%.2lf.\n", 
-			(*temp_joint).account.balance);
+			(*temp_joint_p).account.balance);
 			loop =1;
 		}
 	}
@@ -891,7 +895,7 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
     if (confirmation[1]!='\0')
     {
       printf("\nInvalid input, please try again.\n");
-	  transfer(currentUserID, headS, headJ);
+	  transfer(currentUserID, headS_p, headJ_p);
 	}
 	else
     {
@@ -905,8 +909,8 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
 	        
 	        int* accID;
         	accID = &check;
-        	temp_joint2 = findJointNode (*accID, headJ);
-            temp_account2 = findSingleNode (*accID, headS);
+        	temp_joint_p2 = findJointNode (*accID, headJ_p);
+            temp_account2 = findSingleNode (*accID, headS_p);
         	printf("Please enter the amount you would like to transfer: $");
         	scanf(" %s", transfer_money);
         	while(getchar() != '\n'){} /*Clear input buffer*/
@@ -922,13 +926,13 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
         	if (letterFound)
 		    {
                 printf("\nInvalid input, please try again.\n");
-		        transfer(currentUserID, headS, headJ);
+		        transfer(currentUserID, headS_p, headJ_p);
             }
             else
             {
                 sscanf(transfer_money, " %lf", &amount);
         	if (temp_account2 != NULL && temp_account != NULL && 
-        	temp_joint == NULL && temp_joint2 == NULL)
+        	temp_joint_p == NULL && temp_joint_p2 == NULL)
         	{       
         	    (*temp_account).account.balance = 
         	    (*temp_account).account.balance - amount;
@@ -938,27 +942,27 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
         	}
         	
         	else if (temp_account2 == NULL && temp_account != NULL && 
-        	temp_joint == NULL && temp_joint2 != NULL)
+        	temp_joint_p == NULL && temp_joint_p2 != NULL)
         	{
         	    (*temp_account).account.balance = 
         	    (*temp_account).account.balance - amount;
-        	    (*temp_joint2).account.balance += amount;
+        	    (*temp_joint_p2).account.balance += amount;
         	    printf("You successfully transfered $%.2lf to %d.\n", 
         	                                                amount, *accID);       
         	}
         	
         	else if (temp_account2 != NULL && temp_account == NULL && 
-        	temp_joint != NULL && temp_joint2 == NULL)
+        	temp_joint_p != NULL && temp_joint_p2 == NULL)
         	{
-        	    (*temp_joint).account.balance = 
-        	    (*temp_joint).account.balance - amount;
+        	    (*temp_joint_p).account.balance = 
+        	    (*temp_joint_p).account.balance - amount;
         	    (*temp_account2).account.balance += amount;
         	    printf("You successfully transfered $%.2lf to %d.\n", 
         	                                                amount, *accID);       
         	}
         	
         	else if (temp_account2 == NULL && temp_account == NULL && 
-        	temp_joint != NULL && temp_joint2 != NULL)
+        	temp_joint_p != NULL && temp_joint_p2 != NULL)
         	{
         	    (*temp_account).account.balance = 
         	    (*temp_account).account.balance - amount;
@@ -970,7 +974,7 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
         	else
         	{
         	     printf("Invalid input, please try again.\n");
-        	     transfer(currentUserID, headS, headJ);
+        	     transfer(currentUserID, headS_p, headJ_p);
         	}
         	}
 	        break;
@@ -981,7 +985,7 @@ void transfer(int* currentUserID, nodeAcc_t* headS, nodeJAcc_t* headJ)
             
         default:
             printf("\nInvalid input, please try again.\n");
-            transfer(currentUserID, headS, headJ);    	        
+            transfer(currentUserID, headS_p, headJ_p);    	        
 	}
 	}
 }
@@ -1022,21 +1026,21 @@ void encryptDecrypt(FILE *initial, FILE *changed, char* pass) {
  * inputs:
  * - Bank ID (int userID)
  * - Bank PIN (int userPin)
- * - Head of linked list of single accounts (nodeAcc_t* headS)
- * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+ * - Head of linked list of single accounts (nodeAcc_t* headS_p)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ_p)
  * outputs:
  * - Integer acting as boolean variable to determine true or false.
  Author: Ethan Goh
 *******************************************************************************/
 int isCorrectLogin(int userID,
 					int userPin, 
-					nodeAcc_t* headS, 
-					nodeJAcc_t* headJ){
+					nodeAcc_t* headS_p, 
+					nodeJAcc_t* headJ_p){
 	nodeAcc_t* testAcc;
 	nodeJAcc_t* testJoint;
 	
-	testAcc = findSingleNode(userID, headS);
-	testJoint = findJointNode(userID, headJ);
+	testAcc = findSingleNode(userID, headS_p);
+	testJoint = findJointNode(userID, headJ_p);
 	
 	if(testAcc != NULL){
 		if((*testAcc).account.pin == userPin){
@@ -1059,13 +1063,13 @@ int isCorrectLogin(int userID,
  * This function controls the user login menu and allows the user to input a 
  * number to access different menu items.
  * inputs:
- * - Head of linked list of single accounts (nodeAcc_t* headS)
- * - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+ * - Head of linked list of single accounts (nodeAcc_t* headS_p)
+ * - Head of linked list of joint accounts (nodeJAcc_t* headJ_p)
  * outputs:
  * - none
  Author: Ethan Goh
 *******************************************************************************/
-void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
+void loginUser(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p){
 	int* currentUserID = malloc(sizeof(int) * 1);
 	int* currentUserPin = malloc(sizeof(int) * 1);
 	int found = FALSE;
@@ -1078,7 +1082,7 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 		scanf(" %d", currentUserPin);
 		while(getchar() != '\n'){} /*Clear input buffer*/
 		found = isCorrectLogin(*currentUserID,
-							*currentUserPin, headS, headJ);
+							*currentUserPin, headS_p, headJ_p);
 		if(found){
 			userInput = 0;
 			while(userInput != 6){
@@ -1086,20 +1090,20 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 				scanf(" %d", &userInput);
 				switch(userInput){
 					case 1: /*Deposit*/
-						deposit(currentUserID, headS, headJ);
+						deposit(currentUserID, headS_p, headJ_p);
 						break;
 					case 2: /*Withdraw*/
-						withdraw(currentUserID, headS, headJ);
+						withdraw(currentUserID, headS_p, headJ_p);
 						break;
 					case 3: /*Edit Account Details*/
-						editAccount(currentUserID, headS, headJ);
+						editAccount(currentUserID, headS_p, headJ_p);
 						break;
 					case 4: /*Delete Account*/
-						removeAccount(currentUserID, headS, headJ);
+						removeAccount(currentUserID, headS_p, headJ_p);
 						/*userInput = 6;*/
 						break;
 					case 5: /*Transfer funds to another account*/
-						transfer(currentUserID, headS, headJ);
+						transfer(currentUserID, headS_p, headJ_p);
 						break;
 					case 6: /*Logout*/
 						found = FALSE;
@@ -1125,13 +1129,13 @@ void loginUser(nodeAcc_t* headS, nodeJAcc_t* headJ){
 /*******************************************************************************
  * This function explicitly steps through a process to create a single account.
  * inputs:
- * - Head of linked list of single accounts (nodeAcc_t* headS)
+ * - Head of linked list of single accounts (nodeAcc_t* headS_p)
  * outputs:
  * - none
  Author: Ethan Goh
 *******************************************************************************/
 
-void singleAccountCreation(nodeAcc_t* headS){
+void singleAccountCreation(nodeAcc_t* headS_p){
 	int i;
 	account_t newAcc;
 	int allowed = FALSE;
@@ -1200,7 +1204,7 @@ void singleAccountCreation(nodeAcc_t* headS){
 	while(!allowed){
 		srand(rndSeed);
 		rndNo = rand() % (1000000 - 100000)	+ 100000;
-		allowed = findSingleNode(rndNo, headS) == NULL ? TRUE : FALSE;
+		allowed = findSingleNode(rndNo, headS_p) == NULL ? TRUE : FALSE;
 	}
 	printf("Your unique Bank ID is: %d\n", rndNo);
 	
@@ -1234,7 +1238,7 @@ void singleAccountCreation(nodeAcc_t* headS){
 	strcpy(newAcc.fname, fname);
 	strcpy(newAcc.lname, lname);
 	newAcc.balance = 0;
-	appendSingleAccNode(newAcc, headS);
+	appendSingleAccNode(newAcc, headS_p);
 	
 	free(fname);
 	free(lname);
@@ -1244,13 +1248,13 @@ void singleAccountCreation(nodeAcc_t* headS){
 /*******************************************************************************
  * This function explicitly steps through a process to create a joint account.
  * inputs:
- * - Head of linked list of joint accounts (nodeAcc_t* headJ)
+ * - Head of linked list of joint accounts (nodeAcc_t* headJ_p)
  * outputs:
  * - none
  Author: Ethan Goh
 *******************************************************************************/
 
-void jointAccountCreation(nodeJAcc_t* headJ){
+void jointAccountCreation(nodeJAcc_t* headJ_p){
 	int i;
 	jointAccount_t newAcc;
 	int allowed = FALSE;
@@ -1370,7 +1374,7 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	}
 	while(!allowed){
 		rndNo1 = rand() % (1000000 - 100000) + 100000;
-		allowed = findJointNode(rndNo1, headJ) == NULL ? TRUE : FALSE;
+		allowed = findJointNode(rndNo1, headJ_p) == NULL ? TRUE : FALSE;
 		allowed = (rndNo1 == 0) ? FALSE : TRUE;
 	}
 	printf("For %s, Your unique Bank ID is: %d\n", fname1, rndNo1);
@@ -1410,7 +1414,7 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	}
 	while(!allowed){
 		rndNo2 = rand() % (1000000 - 100000) + 100000;
-		allowed = findJointNode(rndNo2, headJ) == NULL? TRUE : FALSE;
+		allowed = findJointNode(rndNo2, headJ_p) == NULL? TRUE : FALSE;
 		allowed = (rndNo2 == 0) ? FALSE : TRUE;
 	}
 	printf("For %s, Your unique Bank ID is: %d\n", fname2, rndNo2);
@@ -1449,7 +1453,7 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 	strcpy(newAcc.lname1, lname1);
 	strcpy(newAcc.lname2, lname2);
 	newAcc.balance = 0;
-	appendJointAccNode(newAcc, headJ);
+	appendJointAccNode(newAcc, headJ_p);
 	
 	free(fname1);
 	free(lname1);
@@ -1462,14 +1466,14 @@ void jointAccountCreation(nodeJAcc_t* headJ){
 /*******************************************************************************
 * This function saves all accounts of both types into a file.
 * inputs:
-* - Head of linked list of single accounts (nodeAcc_t* headJ)
-* - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+* - Head of linked list of single accounts (nodeAcc_t* headJ_p)
+* - Head of linked list of joint accounts (nodeJAcc_t* headJ_p)
 * - Encryption key (char* pass)
 * outputs:
 * - Integer indicating success in saving (0 = Failure)(int)
 Author: Ethan Goh
 *******************************************************************************/
-int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass) {
+int saveAccountsToFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass) {
 	/*
 	WRITING FORMAT:
 	FOR SINGLE ACCOUNTS:
@@ -1485,8 +1489,8 @@ int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass) {
 #endif
 	FILE* writePtr;
 	FILE* encryptData;
-	nodeAcc_t* currNode = headS;
-	nodeJAcc_t* currNodeJ = headJ;
+	nodeAcc_t* currNode = headS_p;
+	nodeJAcc_t* currNodeJ = headJ_p;
 	int success = FALSE;
 
 	writePtr = fopen("plainTxt.bin", "wb");
@@ -1538,13 +1542,14 @@ int saveAccountsToFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass) {
 /*******************************************************************************
 * This function loads accounts from a database.bin file.
 * inputs:
-* - Head of linked list of single accounts (nodeAcc_t* headJ)
-* - Head of linked list of joint accounts (nodeJAcc_t* headJ)
+* - Head of linked list of single accounts (nodeAcc_t* headS_p)
+* - Head of linked list of joint accounts (nodeJAcc_t* headJ_p)
+* - Pointer to an array of chars (char* pass)
 * outputs:
 * - Integer indicating success in loading. (int)
 Author: Ethan Goh
 *******************************************************************************/
-int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass){
+int loadAccountsFromFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass){
 	/*
 	WRITING FORMAT:
 	FOR SINGLE ACCOUNTS:
@@ -1589,12 +1594,12 @@ int loadAccountsFromFile(nodeAcc_t* headS, nodeJAcc_t* headJ, char* pass){
 				}
 				else {
 					readAccount = singleAccountStringSplit(accountStr);
-					appendSingleAccNode(readAccount, headS);
+					appendSingleAccNode(readAccount, headS_p);
 				}
 			}
 			else {
 				readJoint = jointAccountStringSplit(accountStr);
-				appendJointAccNode(readJoint, headJ);
+				appendJointAccNode(readJoint, headJ_p);
 			}
 		}
 		success = TRUE;
