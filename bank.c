@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 #ifdef DEBUG
 	printf("DEBUG IS DEFINED. IF THIS IS NOT INTENDED,");
 	printf("PLEASE DISABLE DEBUG MODE IN THE SOURCE BEFORE COMPILING\n");
-	printf("\nPLEASE READ THE README.\n");
+	printf("\nPLEASE READ THE README BEFORE RUNNING THE PROGRAM.\n");
 #endif
 	/*
 		1) Get the Username from the user. decrypt the password.
