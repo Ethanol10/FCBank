@@ -81,7 +81,6 @@ int main(int argc, char* argv[])
 #ifdef DEBUG
 	printf("DEBUG IS DEFINED. IF THIS IS NOT INTENDED,");
 	printf("PLEASE DISABLE DEBUG MODE IN THE SOURCE BEFORE COMPILING\n");
-	printf("\nPLEASE READ THE README BEFORE RUNNING THE PROGRAM.\n");
 #endif
 	/*
 		1) Get the Username from the user. decrypt the password.
@@ -233,7 +232,7 @@ int main(int argc, char* argv[])
 							printf("Passwords do not match.\n");
 						}
 						
-						/*Decrypting old database with old master password*/
+						/*Decrypting old database with the old master password*/
 						reXORPtr = fopen("database.bin", "rb");
 						plainTxtPtr = fopen("plainTxt.bin", "wb");
 #ifdef DEBUG
@@ -244,7 +243,7 @@ int main(int argc, char* argv[])
 						fclose(reXORPtr);
 						fclose(plainTxtPtr);
 						
-						/*Encrypting the plain text with new master password*/
+						/*Encrypting the plain text with a new master password*/
 						reXORPtr = fopen("database.bin", "wb");
 						plainTxtPtr = fopen("plainTxt.bin", "rb");
 #ifdef DEBUG
@@ -401,14 +400,13 @@ void editAccount(int* currentUserID_p, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 	temp_joint_p = findJointNode (*currentUserID_p, headJ_p);
     temp_account_p = findSingleNode (*currentUserID_p, headS_p);
 	
-	/*checks if account exists and if it is a single account*/
 	if(temp_account_p != NULL && temp_joint_p == NULL)
 	{
 		printf("What do you wish to change?\n");
 		printMenu(5);
 		scanf(" %d", &choice);
 		while(getchar() != '\n'){} /*Clear input buffer*/
-		while(loop==0)/*Run until program updates variable loop*/
+		while(loop==0)
 		{
 			switch(choice)
 			{
@@ -442,7 +440,7 @@ void editAccount(int* currentUserID_p, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			}
 		}
 	}
-	/*check if account exists and if it is a joint account */
+	
 	else if (temp_joint_p!= NULL && temp_account_p == NULL)
 	{	
 		loop =0;
@@ -450,7 +448,7 @@ void editAccount(int* currentUserID_p, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 		printMenu(6);
 		scanf(" %d", &choice);
 		while(getchar() != '\n'){} /*Clear input buffer*/
-		while(loop==0)/*Run until program updates variable loop*/
+		while(loop==0)
 		{
 			switch(choice)
 			{
@@ -531,12 +529,13 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
     scanf(" %s", sure_or_not);
     while(getchar() != '\n'){} /*Clear input buffer*/
     printf("\n");
-    if (sure_or_not[1]!='\0')
+    /*check the first confirmation*/
+    if (sure_or_not[1]!='\0') /*when input more than 2 characters*/
     {
       printf("Invalid input, please try again.\n");
 	  removeAccount(currentUserID, headS_p, headJ_p);
 	}
-	else
+	else/*when input has 1 character only'*/
 	{
     switch (sure_or_not[0])
     {
@@ -547,12 +546,12 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			    if(temp_account_p != NULL && temp_joint_p == NULL) 
 			    {  
 	    	       printf("You still have $%.2lf as balance in your account.\n", 
-	    	                                   (*temp_account_p).account.balance);
+	    	                                 (*temp_account_p).account.balance);
 			    }
 			    else if (temp_joint_p != NULL && temp_account_p == NULL)
                 {
                    printf("You still have $%.2lf as balance in your account.\n", 
-                                               (*temp_joint_p).account.balance); 
+                                             (*temp_joint_p).account.balance); 
                 }
                           
 			    printf("Your balance will be lost after");
@@ -561,30 +560,39 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			    scanf (" %s", balance_check);
 			    while(getchar() != '\n'){} /*Clear input buffer*/
                 printf("\n");
+      /*second confirmation before deleting after knowing the current balance*/
+      
+      /*when the input has more than 2 characters*/
 			    if (balance_check[1]!='\0')
                 {
                 printf("Invalid input, please try again.\n");
 	            removeAccount(currentUserID, headS_p, headJ_p);
 	            }
+	  /*when the input has just 1 character*/
 	            else
 	            {
+	            /*when input is 'Y' for second confirmation*/
 			    if (balance_check[0]=='Y')
 	            {
+	              /*remove the single account*/
 		          if (temp_account_p != NULL && temp_joint_p == NULL)
   	              {
 		              removeSingleAccNode((*temp_account_p).account, headS_p);
     		      }
+    		      /*remove the joint account*/
 		          else if (temp_joint_p != NULL && temp_account_p == NULL)
     	          {
 				      removeJointAccNode((*temp_joint_p).account, headJ_p);
 			      }
 	            printf("Your account was successfully deleted.\n");
 	            break;
-			    }   
+			    } 
+			    /*when input is 'N' for second confirmation*/  
 			    else if (balance_check[0] == 'N')
 			    {
 		            break;
-    	        } 
+    	        }
+    	        /*when the character is not 'Y' or 'N'*/ 
 			    else
 			    {
 			       printf("Invalid input, please try again.\n");
@@ -597,7 +605,7 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 				printf("\n");
 				break;
 				
-	   default:
+	   default: /*the first confirmation is different than 'Y' or 'N'*/
 	            printf("\nInvalid input, please try again.\n");
 	            removeAccount(currentUserID, headS_p, headJ_p);
 	            
@@ -629,13 +637,12 @@ void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 	temp_joint_p = findJointNode (*currentUserID, headJ_p);
     temp_account_p = findSingleNode (*currentUserID, headS_p);	
 	
-	/* check how much is in the balance*/
+	/*check how much is in the balance*/
 	while(loop == 0)
 	{
 		#ifdef DEBUG
 		printf("entering withdraw loop\n");
 		#endif
-		/*If account exists and has a positive balance, show balance*/
 		if(temp_account_p != NULL && (*temp_account_p).account.balance>0 ) 
 		{  
 			printf("Your current balance is $%.2lf.\n", 
@@ -651,7 +658,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			printf("Returning to main menu.\n");
 			return;
 		}
-		/*If account exists and has a positive balance, show balance*/
+	
 		else if (temp_joint_p != NULL && (*temp_joint_p).account.balance>0)
 		{
 			printf("Your current balance is $%.2lf.\n", 
@@ -671,7 +678,6 @@ void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 		
 	printf("Do you wish to continue withdrawing? Y or N\n");
 	scanf(" %s", confirmation);
-	/*Check if string entered is only one character*/
 	while(strlen(confirmation)>1)
 		{
 			printf("Invalid input. Please try again.\n");
@@ -702,7 +708,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 					(*temp_account_p).account.balance);	
                     printf("\n");
 				}
-				/*Don't allow user to withdraw if balance is less than amount*/
+				
 				else if(temp_account_p != NULL &&
 				     (*temp_account_p).account.balance<amount)
 				{
@@ -719,7 +725,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			            (*temp_joint_p).account.balance);
 			        printf("\n");			  
 				}
-				/*Don't allow user to withdraw if balance is less than amount*/
+				
 				else if(temp_joint_p != NULL && 
 				    (*temp_joint_p).account.balance<amount)
 				{
@@ -731,7 +737,7 @@ void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			case 'N': /*No to deposit*/
 				break;
 				
-			default:
+			default: /*Wrong input for first confirmation*/
 				printf("Invalid input, please try again.\n");
 				withdraw(currentUserID, headS_p, headJ_p);
 				break;
@@ -762,26 +768,26 @@ void deposit(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
     temp_joint_p = findJointNode (*currentUserID, headJ_p);
     temp_account_p = findSingleNode (*currentUserID, headS_p);	
     
-    /* check the current balance*/
-	if(temp_account_p != NULL) 
+    /*Check the current balance*/
+	if(temp_account_p != NULL) /*When the user account is a single account*/
 	{  
 		printf("Your current balance is $%.2lf.\n", 
 		                            (*temp_account_p).account.balance);
     }
-	else if (temp_joint_p != NULL)
+	else if (temp_joint_p != NULL)/*When the user account is a joint account*/
     {
         printf("Your current balance is $%.2lf.\n", 
                                     (*temp_joint_p).account.balance);
     }
     
-    /*second question to make sure users want to delete their account*/
+    /*Second confirmation*/
     printf("Are you want to continue to deposit? (Y/N) "); 
     scanf(" %s", want_or_not);           
     while(getchar() != '\n'){} /*Clear input buffer*/
-    /* check that the users just enter only 'Y' or 'N'*/
+    /*Check that the users just enter only 'Y' or 'N'*/
 	if (want_or_not[1]!='\0') 
     {
-      printf("Invalid input, please try again.\n");
+      printf("\nInvalid input, please try again.\n");
 	  deposit(currentUserID, headS_p, headJ_p);
 	}
 	else
@@ -796,37 +802,38 @@ void deposit(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 				    while(getchar() != '\n'){} /*Clear input buffer*/
 				    printf("\n");
 				    letterFound = FALSE;
-	/*check that the input add_money is a string of numbers, can be with decimal*/
+/*Check that the input add_money is a string of numbers, can be with decimal*/
 				    for(i = 0; i < strlen(add_money); i++){
-			            if((add_money[i] < '0' || add_money[i] > '9') 
-			                                        && add_money[i] != '.'){
-				        letterFound = TRUE;
-				        i = strlen(add_money);
-			            }
+			        if((add_money[i] < '0' || add_money[i] > '9') 
+			                                       && add_money[i] != '.'){
+			        letterFound = TRUE;
+		            i = strlen(add_money);
 		            }
-/*check if there is a letter in add_money, then print invalid input and return deposit function*/	    
+		            }
+                   /*Check if there is character other than number in add_money, 
+                    then print invalid input and return deposit function*/	    
 		            if (letterFound) 
 		            {
 		                printf("\nInvalid input, please try again.\n");
 				        deposit(currentUserID, headS_p, headJ_p);
 		            }
-/*else convert string add_money to amount in double type */
+                    /*Else convert string add_money to amount in double type */
 		            else
 		            {
 		            sscanf(add_money, " %lf", &amount);
-				/* deposit in single account with entered amount greater than 0*/
-				    if (temp_account_p != NULL && amount > 0) 
+				/*Deposit in single account with entered amount greater than 0*/
+				    if (temp_account_p != NULL) 
 				    {
 				        (*temp_account_p).account.balance += amount;
 				        printf("Your deposit is successful.\n");
 				        printf("Your new balance is $%.2lf.\n", 
-				                               (*temp_account_p).account.balance);
+				                             (*temp_account_p).account.balance);
 				        printf("\n");
 				        deposit(currentUserID, headS_p, headJ_p);   
 				    }
 				    
-				 /* deposit in joint account with entered amount greater than 0*/
-				    else if (temp_joint_p !=NULL && amount > 0) 
+				 /*Deposit in joint account with entered amount greater than 0*/
+				    else if (temp_joint_p !=NULL) 
 				    {
 				        (*temp_joint_p).account.balance += amount;
 				        printf("Your deposit is successful.\n");
@@ -836,11 +843,6 @@ void deposit(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 				        deposit(currentUserID, headS_p, headJ_p);
 				    }
 				 
-				    else
-				    {
-				        printf("\nInvalid input, please try again.\n");
-				        deposit(currentUserID, headS_p, headJ_p);
-				    }
 				    } 
 				    break;
 				
@@ -848,7 +850,7 @@ void deposit(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 				printf("\n");
 				break;
 				
-	   default:
+	   default: /*Wrong input for first confirmation*/
 	            printf("\nInvalid input, please try again.\n");
 	            deposit(currentUserID, headS_p, headJ_p);	            
     }
@@ -875,18 +877,17 @@ void transfer(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 
 	nodeAcc_t* temp_account_p;
 	nodeJAcc_t* temp_joint_p;
-	nodeAcc_t* temp_account2;
-	nodeJAcc_t* temp_joint_p2;
+	nodeAcc_t* temp_account2_p;
+	nodeJAcc_t* temp_joint2_p;
 	
 	temp_joint_p = findJointNode (*currentUserID, headJ_p);
     temp_account_p = findSingleNode (*currentUserID, headS_p);
 	
-	while(loop == 0)/*Run until variable loop*/
+	while(loop == 0)
 	{
 		#ifdef DEBUG
 		printf("entering transfer loop\n");
 		#endif
-		/* Check if account exists and if account balance is greater than 0 */
 		if(temp_account_p != NULL && (*temp_account_p).account.balance>0 ) 
 		{  
 			printf("Your current balance is $%.2lf.\n", 
@@ -902,7 +903,7 @@ void transfer(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			printf("Returning to main menu.\n");
 			return;
 		}
-		/*Check if account exists and if account balance is greater than 0*/
+	
 		else if (temp_joint_p != NULL && (*temp_joint_p).account.balance>0)
 		{
 			printf("Your current balance is $%.2lf.\n", 
@@ -920,12 +921,12 @@ void transfer(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 		}
 	}
 	
-	printf("Do you wish to continue transferring? Y or N\n");
+	printf("Do you wish to continue transferring? (Y/N) ");
 	
 	scanf(" %s", confirmation);           
     while(getchar() != '\n'){} /*Clear input buffer*/
     loop = 0;
-/*check that user input for confirmation is just only 'Y' or 'N'*/
+    /*Check that user input for confirmation is just only 'Y' or 'N'*/
     if (confirmation[1]!='\0')
     {
       printf("\nInvalid input, please try again.\n");
@@ -943,14 +944,15 @@ void transfer(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 	        
 	        int* accID;
         	accID = &check;
-        	temp_joint_p2 = findJointNode (*accID, headJ_p);
-            temp_account2 = findSingleNode (*accID, headS_p);
+        	temp_joint2_p = findJointNode (*accID, headJ_p);
+            temp_account2_p = findSingleNode (*accID, headS_p);
         	printf("Please enter the amount you would like to transfer: $");
         	scanf(" %s", transfer_money);
         	while(getchar() != '\n'){} /*Clear input buffer*/
         	printf("\n");
 		    letterFound = FALSE;
-/*check that the input transfer_money is a string of numbers*/
+            /*Check that the input transfer_money is a string of numbers,
+            can be with decimal*/
 		    for(i = 0; i < strlen(transfer_money); i++){
 	            if((transfer_money[i] < '0' || transfer_money[i] > '9')
 	                                            && transfer_money[i] != '.'){
@@ -958,58 +960,62 @@ void transfer(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			        i = strlen(transfer_money);
 		            }
             }
-/*check if there is a letter in transfer_money*/
-/*then print invalid input and return deposit function*/
+            /*Check if there is a letter in transfer_money, 
+            then print invalid input and return deposit function*/
         	if (letterFound)
 		    {
                 printf("\nInvalid input, please try again.\n");
 		        transfer(currentUserID, headS_p, headJ_p);
             }
-/*else convert string add_money to amount in double type */
+            /*Else convert string add_money to amount in double type*/
             else
             {
                 sscanf(transfer_money, " %lf", &amount);
-/*transfer from a single account to a single account*/
-        	if (temp_account2 != NULL && temp_account_p != NULL && 
-        	temp_joint_p == NULL && temp_joint_p2 == NULL)
+            /*Transfer from a single account to a single account*/
+        	if (temp_account2_p != NULL && temp_account_p != NULL && 
+        	temp_joint_p == NULL && temp_joint2_p == NULL)
         	{       
         	    (*temp_account_p).account.balance = 
         	    (*temp_account_p).account.balance - amount;
-        	    (*temp_account2).account.balance += amount;
+        	    (*temp_account2_p).account.balance += amount;
         	    printf("You successfully transfered $%.2lf to %d.\n", 
-        	                                                amount, *accID);       
+        	                                                amount, *accID); 
+        	    transfer(currentUserID, headS_p, headJ_p);     
         	}
-/*transfer from a single account to a joint account*/
-        	else if (temp_account2 == NULL && temp_account_p != NULL && 
-        	temp_joint_p == NULL && temp_joint_p2 != NULL)
+            /*Transfer from a single account to a joint account*/
+        	else if (temp_account2_p == NULL && temp_account_p != NULL && 
+        	temp_joint_p == NULL && temp_joint2_p != NULL)
         	{
         	    (*temp_account_p).account.balance = 
         	    (*temp_account_p).account.balance - amount;
-        	    (*temp_joint_p2).account.balance += amount;
+        	    (*temp_joint2_p).account.balance += amount;
         	    printf("You successfully transfered $%.2lf to %d.\n", 
-        	                                                amount, *accID);       
+        	                                                amount, *accID);      
+        	    transfer(currentUserID, headS_p, headJ_p);
         	}
-/*transfer from a joint account to a single account*/
-        	else if (temp_account2 != NULL && temp_account_p == NULL && 
-        	temp_joint_p != NULL && temp_joint_p2 == NULL)
+            /*Transfer from a joint account to a single account*/
+        	else if (temp_account2_p != NULL && temp_account_p == NULL && 
+        	temp_joint_p != NULL && temp_joint2_p == NULL)
         	{
         	    (*temp_joint_p).account.balance = 
         	    (*temp_joint_p).account.balance - amount;
-        	    (*temp_account2).account.balance += amount;
+        	    (*temp_account2_p).account.balance += amount;
         	    printf("You successfully transfered $%.2lf to %d.\n", 
         	                                                amount, *accID);       
+        	    transfer(currentUserID, headS_p, headJ_p);
         	}
-/*transfer from a joint account to a joint account*/
-        	else if (temp_account2 == NULL && temp_account_p == NULL && 
-        	temp_joint_p != NULL && temp_joint_p2 != NULL)
+            /*Transfer from a joint account to a joint account*/
+        	else if (temp_account2_p == NULL && temp_account_p == NULL && 
+        	temp_joint_p != NULL && temp_joint2_p != NULL)
         	{
-        	    (*temp_account_p).account.balance = 
-        	    (*temp_account_p).account.balance - amount;
-        	    (*temp_account2).account.balance += amount;
+        	    (*temp_joint_p).account.balance = 
+        	    (*temp_joint_p).account.balance - amount;
+        	    (*temp_joint2_p).account.balance += amount;
         	    printf("You successfully transfered $%.2lf to %d.\n", 
-        	                                                amount, *accID);       
+        	                                                amount, *accID); 
+        	    transfer(currentUserID, headS_p, headJ_p);
         	}
-/* print invalid input when the the entered ID that
+            /*Print invalid input when the the entered ID that
 					user wanted to transfer to is wrong */
         	else
         	{
@@ -1019,11 +1025,11 @@ void transfer(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
         	}
 	        break;
 	        
-        case 'N':/* No to transfer */
+        case 'N': /*No to transfer*/
             printf("\n");
             break;
             
-        default:
+        default: /*Wrong input for first confirmation*/
             printf("\nInvalid input, please try again.\n");
             transfer(currentUserID, headS_p, headJ_p);    	        
 	}
@@ -1082,7 +1088,6 @@ int isCorrectLogin(int userID,
 	testAcc = findSingleNode(userID, headS_p);
 	testJoint = findJointNode(userID, headJ_p);
 	
-	/*Check if account has correct credentials*/
 	if(testAcc != NULL){
 		if((*testAcc).account.pin == userPin){
 			return TRUE;
@@ -1142,7 +1147,7 @@ void loginUser(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p){
 						break;
 					case 4: /*Delete Account*/
 						removeAccount(currentUserID, headS_p, headJ_p);
-						/*userInput = 6;*/
+						userInput = 6;
 						break;
 					case 5: /*Transfer funds to another account*/
 						transfer(currentUserID, headS_p, headJ_p);
@@ -1538,7 +1543,6 @@ int saveAccountsToFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass) {
 	writePtr = fopen("plainTxt.bin", "wb");
 
 	if (writePtr != NULL) {
-		/*Writing Single Accounts*/
 		while (currNode != NULL) {
 			fprintf(writePtr, "%d ", (*currNode).account.id);
 			fprintf(writePtr, "%d ", (*currNode).account.pin);
@@ -1550,7 +1554,6 @@ int saveAccountsToFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass) {
 
 		fprintf(writePtr, "JOINTACCOUNT\n");
 
-		/*Writing Joint Accounts*/
 		while (currNodeJ != NULL) {
 			fprintf(writePtr, "%d ", (*currNodeJ).account.userID1);
 			fprintf(writePtr, "%d ", (*currNodeJ).account.userID2);
@@ -1612,7 +1615,6 @@ int loadAccountsFromFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass){
 	jointAccount_t readJoint;
 	int jointFlag = FALSE;
 
-	/*Decrypting data*/
 	decryptData = fopen("database.bin", "rb");
 	readPtr = fopen("plainTxt.bin", "wb");
 	if (decryptData != NULL) {
@@ -1630,7 +1632,6 @@ int loadAccountsFromFile(nodeAcc_t* headS_p, nodeJAcc_t* headJ_p, char* pass){
 	printf("Reading accounts from file\n");
 #endif
 
-	/*Assign plain text to variables in linked list.*/
 	readPtr = fopen("plainTxt.bin", "rb");
 	if (readPtr != NULL) {
 		while ((fgets(accountStr, 150, readPtr) != NULL)) {
