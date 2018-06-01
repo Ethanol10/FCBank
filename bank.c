@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
 							printf("Passwords do not match.\n");
 						}
 						
-						/*Decrypting old database with the old master password.*/
+						/*Decrypting old database with the old master password*/
 						reXORPtr = fopen("database.bin", "rb");
 						plainTxtPtr = fopen("plainTxt.bin", "wb");
 #ifdef DEBUG
@@ -550,7 +550,7 @@ void removeAccount(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			    else if (temp_joint_p != NULL && temp_account == NULL)
                 {
                    printf("You still have $%.2lf as balance in your account.\n", 
-                                                 (*temp_joint_p).account.balance); 
+                                               (*temp_joint_p).account.balance); 
                 }
                           
 			    printf("Your balance will be lost after");
@@ -688,7 +688,8 @@ void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 				while(getchar() != '\n'){} /*Clear input buffer*/
 				printf("\n");
 				/*Withdraw from a single account*/
-				if (temp_account != NULL && (*temp_account).account.balance>=amount)
+				if (temp_account != NULL && 
+				    (*temp_account).account.balance>=amount)
 				{
 				    (*temp_account).account.balance = 
 					(*temp_account).account.balance - amount;
@@ -715,7 +716,8 @@ void withdraw(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 			        printf("\n");			  
 				}
 				
-				else if(temp_joint_p != NULL && (*temp_joint_p).account.balance<amount)
+				else if(temp_joint_p != NULL && 
+				    (*temp_joint_p).account.balance<amount)
 				{
 				    printf("Sorry, you have insufficient funds.\n");
 				}
@@ -821,7 +823,7 @@ void deposit(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 				        (*temp_joint_p).account.balance += amount;
 				        printf("Your deposit is successful.\n");
 				        printf("Your new balance is $%.2lf.\n", 
-				                                (*temp_joint_p).account.balance);
+				                              (*temp_joint_p).account.balance);
 				        printf("\n");
 				        deposit(currentUserID, headS_p, headJ_p);
 				    }
@@ -1048,7 +1050,8 @@ int isCorrectLogin(int userID,
 		}
 	}
 	else if(testJoint != NULL){
-		if((*testJoint).account.userPin1 == userPin || (*testJoint).account.userPin2 == userPin){
+		if((*testJoint).account.userPin1 == userPin || 
+		        (*testJoint).account.userPin2 == userPin){
 			return TRUE;
 		}
 	}
