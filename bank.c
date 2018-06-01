@@ -879,18 +879,39 @@ void transfer(int* currentUserID, nodeAcc_t* headS_p, nodeJAcc_t* headJ_p)
 	
 	while(loop == 0)
 	{
-		if(temp_account != NULL && temp_joint_p == NULL) 
+		#ifdef DEBUG
+		printf("entering transfer loop\n");
+		#endif
+		if(temp_account != NULL && (*temp_account).account.balance>0 ) 
 		{  
 			printf("Your current balance is $%.2lf.\n", 
 			(*temp_account).account.balance);
 			loop =1;
 		}
+		/*If balance is too low, user cannot withdraw*/
+		else if(temp_account != NULL && (*temp_account).account.balance<=0)
+		{
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_account).account.balance);
+			printf("Your balance is too low to transfer.\n");
+			printf("Returning to main menu.\n");
+			return;
+		}
 	
-		else if (temp_joint_p != NULL && temp_account == NULL)
+		else if (temp_joint_p != NULL && (*temp_joint_p).account.balance>0)
 		{
 			printf("Your current balance is $%.2lf.\n", 
 			(*temp_joint_p).account.balance);
 			loop =1;
+		}
+		/*If balance is too low, user cannot withdraw*/
+		else if(temp_joint_p != NULL && (*temp_joint_p).account.balance<=0)
+		{
+			printf("Your current balance is $%.2lf.\n", 
+			(*temp_joint_p).account.balance);
+			printf("Your balance is too low to transfer.\n");
+			printf("Returning to main menu.\n");
+			return;
 		}
 	}
 	
